@@ -8,7 +8,7 @@ Function Install-NugetCommandLine
         [Parameter(Mandatory = $false, ParameterSetName="SourcePath")]
         [string]$SourcePath,
 
-        [string]$Path = (Join-Path "$env:ProgramFiles(x86)" "Nuget"),
+        [string]$Path = (Join-Path "${env:ProgramFiles(x86)}" "Nuget"),
         [switch]$Force
     )
 
@@ -20,22 +20,42 @@ Function Install-NugetCommandLine
     $nugetVersion = Get-NugetVersion    
     $nugetExe = Join-Path $Path "nuget.exe"
     
-    if([string]::IsNullOrEmpty($nugetVersion) -or $force)
+    if([string]::IsNullOrEmpty($nugetVersion) -or $Force)
     {
         if (! (Test-Path $Path))
         {
             New-Item $Path -ItemType Directory -Force > $null
         }
-        try 
+
+       if ($SourcePath) {
+            try
+            {
+                Write-Verbose "Copying Nuget command line from $SourcePath to $Path"
+                if(Test-Path $SourcePath)
+                {
+                    Copy-Item (Join-Path $SourcePath "nuget.exe") $Path
+                }
+            }
+            catch
+            {
+                Write-Warning "Failed to copy nuget from $SourcePath. Do you have the correct permissions?"
+                throw
+            }
+
+        } elseif ($Url)
         {
-            Write-Verbose "Downloading Nuget command line to $Path"
-            Invoke-WebRequest $Url -OutFile $nugetExe -TimeoutSec 20
+            try 
+            {
+                Write-Verbose "Downloading Nuget command line to $Path"
+                Invoke-WebRequest $Url -OutFile $nugetExe -TimeoutSec 20
+            }
+            catch [System.Net.WebException]
+            {
+                Write-Warning "Do you have internet connection? If not try using -SourcePath instead."
+                throw            
+            }
         }
-        catch [System.Net.WebException]
-        {
-            Write-Warning "Do you have internet connection? If not try using -SourcePath instead."
-            throw            
-        }
+
 
         # remove old nuget from the system path
         $env:path = ($env:path.Split(';') | Where-Object { $_ -notmatch 'nuget' }) -join ';'
@@ -49,6 +69,6 @@ Function Install-NugetCommandLine
         Write-Output "Installed nuget version $nugetVersion in $Path"
 
     } else {
-        Write-Warning "Nuget already installed. Skipping."
+        Write-Warning "Nuget $nugetVersion already installed. Skipping."
     }       
 }

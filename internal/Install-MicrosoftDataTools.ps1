@@ -13,6 +13,13 @@ Function Install-MicrosoftDataTools
     }
     $nugetPackage = "Microsoft.Data.Tools.Msbuild"
     Write-Verbose "Installing nuget package $nugetPackage"
-    
-    & nuget.exe install $nugetPackage -ExcludeVersion -OutputDirectory $NugetInstallPath
+
+    try
+    {
+        & nuget.exe install $nugetPackage -ExcludeVersion -OutputDirectory $NugetInstallPath
+    }
+    catch
+    {
+        throw
+    }
 }
