@@ -2,8 +2,9 @@ Function Install-MsBuild
 {
     [cmdletbinding()]
     param (
-        $Url = "https://download.microsoft.com/download/E/E/D/EEDF18A8-4AED-4CE0-BEBE-70A83094FC5A/BuildTools_Full.exe",
-        [switch] $Force
+        [string]$Url = "https://download.microsoft.com/download/E/E/D/EEDF18A8-4AED-4CE0-BEBE-70A83094FC5A/BuildTools_Full.exe",
+        [string]$version = "14.0",
+        [switch]$Force
     )
 
     if(! (Test-PSUserIsAdmin))
@@ -11,8 +12,8 @@ Function Install-MsBuild
         throw "This command must be run as Administrator"
     }    
     $DownloadPath = Join-Path ([Environment]::GetFolderPath("UserProfile")) "Downloads"    
-    $BuildToolsExe = "$DownloadPath\BuildTools_Full.exe"
-    $MSBuildPath = "${env:ProgramFiles(x86)}\MSBuild\14.0\Bin\MSBuild.exe"
+    $BuildToolsExe = Join-Path $DownloadPath "BuildTools_Full.exe"
+    $MSBuildPath = Join-Path $env:ProgramFiles(x86) "MSBuild\$version\Bin\MSBuild.exe"
     $SkipDownload = $false
     $SkipInstall = $false
     
@@ -28,8 +29,16 @@ Function Install-MsBuild
     }
     if ($SkipDownload -ne $true)
     {
-        Write-Verbose "Downloading MSBuildTools to $BuildToolsExe"
-        Invoke-WebRequest $url -OutFile $BuildToolsExe
+        try 
+        {
+            Write-Verbose "Downloading MSBuildTools to $BuildToolsExe"
+            Invoke-WebRequest $url -OutFile $BuildToolsExe -TimeoutSec 20
+        }
+        catch [System.Net.WebException]
+        {
+            Write-Warning "Do you have internet connection?"
+            throw            
+        }
     }
     
     if(Test-Path $MSBuildPath)
@@ -37,8 +46,7 @@ Function Install-MsBuild
         if($Force)
         {
             Write-Verbose "Removing old version of MSBuildTools"
-            $params = "/uninstall", "/quiet"
-            Start-Process -Wait $BuildToolsExe -ArgumentList $params
+            Start-Process -Wait $BuildToolsExe -ArgumentList ("/uninstall", "/quiet")
         } else {
             Write-Warning "MSBuildTools already exists. Use -Force to overwrite"
             $SkipInstall = $true
