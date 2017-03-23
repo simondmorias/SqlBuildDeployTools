@@ -13,7 +13,7 @@ Function Install-MsBuild
     }    
     $DownloadPath = Join-Path ([Environment]::GetFolderPath("UserProfile")) "Downloads"    
     $BuildToolsExe = Join-Path $DownloadPath "BuildTools_Full.exe"
-    $MSBuildPath = Join-Path $env:ProgramFiles(x86) "MSBuild\$version\Bin\MSBuild.exe"
+    $MSBuildPath = Join-Path ${env:ProgramFiles(x86)} "MSBuild\$version\Bin\MSBuild.exe"
     $SkipDownload = $false
     $SkipInstall = $false
     
@@ -69,7 +69,7 @@ Function Install-MsBuild
     {
         Write-Warning "Failed to cleanup downloaded files at $BuildToolsExe"
     }
-    $version = (& $MSBuildPath /version)[3]
+    $version = Get-MsBuildVersion
     
     if($SkipInstall -ne $true)
     {

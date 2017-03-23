@@ -21,6 +21,10 @@ Describe "$module tests" -Tags 'General' {
 
         It "the module has functions as separate files in the $functionsDirectory directory" {
             "$functionsDirectory\*.ps1" | Should Exist
+        It "the module has functions as separate files in the $functionsDirectory directory" {
+            "$functionsDirectory\*.ps1" | Should Exist
+        It "the module has functions as separate files in the $functionsDirectory directory" {
+            "$functionsDirectory\*.ps1" | Should Exist
         }
 
          It "the module has internal functions as separate files in the $internalDirectory directory" {

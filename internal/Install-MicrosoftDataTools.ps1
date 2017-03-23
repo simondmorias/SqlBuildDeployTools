@@ -11,8 +11,8 @@ Function Install-MicrosoftDataTools
         Write-Verbose "Nuget not found, attempting installation from the internet."
         Install-NugetCommandLine -Force
     }
-    $nugetPackage = "Microsoft.Data.Tools.Msbuild"
     Write-Verbose "Installing nuget package $nugetPackage"
+    $nugetPackage = "Microsoft.Data.Tools.Msbuild"
 
     try
     {

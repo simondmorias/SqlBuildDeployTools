@@ -1,13 +1,13 @@
 Function Initialize-DatabaseProject
 {
 	param ( 
-		[string] $DatabaseSolutionFilePath
-		,[string] $targetVersion=14
-		,[string] $SQLDBExtensionsRefPath="D:\Nuget\Microsoft.Data.Tools.Msbuild\lib\net40"
-		,[string] $SSDTPath="D:\Nuget\Microsoft.Data.Tools.Msbuild\lib\net40"
-		,[string] $BuildConfiguration="Debug"
-		,[string] $MSBuildPath="C:\Windows\Microsoft.NET\Framework64\v4.0.30319"
-		,[switch] $Verbose
+		[string] $DatabaseSolutionFilePath,
+		[string] $targetVersion=14,
+		[string] $MicrosoftDataToolsPath="D:\Nuget\Microsoft.Data.Tools.Msbuild\lib\net40",
+		[string] $SSDTPath="D:\Nuget\Microsoft.Data.Tools.Msbuild\lib\net40",
+		[string] $BuildConfiguration="Debug",
+		[string] $MSBuildPath="C:\Windows\Microsoft.NET\Framework64\v4.0.30319",
+		[switch] $Verbose
 		)
 
 	if($Verbose) { $VerbosePreference = "Continue" }

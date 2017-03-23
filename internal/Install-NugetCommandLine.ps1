@@ -58,14 +58,19 @@ Function Install-NugetCommandLine
 
 
         # remove old nuget from the system path
-        $env:path = ($env:path.Split(';') | Where-Object { $_ -notmatch 'nuget' }) -join ';'
+        # $env:path = ($env:path.Split(';') | Where-Object { $_ -notmatch 'nuget' }) -join ';'
         
         # add the new path
-        $env:Path = "$env:Path;$Path;"
+        # $env:Path = "$env:Path;$Path;"
+        Add-ToSystemPath $Path
 
         Write-Verbose "Path amended to: $env:Path"
 
         $nugetVersion = Get-NugetVersion
+        if([string]::IsNullOrEmpty($nugetVersion))
+        {
+            throw "Failed to obtain nuget version. Is Nuget in your path?"
+        }
         Write-Output "Installed nuget version $nugetVersion in $Path"
 
     } else {

@@ -6,12 +6,10 @@ Function Get-MsBuildVersion
         [string]$MSBuildPath = (Join-Path ${env:ProgramFiles(x86)} "MSBuild\$version\Bin\MSBuild.exe")
     )
 
-    $MSBuildExe = Join-Path $MSBuildPath MSBuild.exe
-    if (Test-Path $MSBuildExe)
+    # add validation so that msbuild.exe is there
+    
+    if (Test-Path $MSBuildPath)
     {
-        (& $MSBuildExe /version)[3]
-    } else {
-        throw "MSBuild does not exist in path $MSBuildExe"
-    }
-
+        (& $MSBuildPath /version)[3]
+    } 
 }
