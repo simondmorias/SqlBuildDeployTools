@@ -15,7 +15,7 @@ Function Initialize-SSISProject
 		$MSBuildPath = $env:SBDT_MSBUILDPATH
 	}
 
-	if (-not (Test-Path $MSBuildPath)){
+	if ([string]::IsNullOrEmpty($MSBuildPath)) {
 		# MsBuild is not found, let's try and install from the internet
 		Write-Warning "MsBuild not found, attempting installation from the internet"
 		Install-MsBuild
@@ -24,12 +24,14 @@ Function Initialize-SSISProject
 		{
 			throw "MsBuild was not found and the attempt to install from the internet also failed."
 		}
+		$MSBuildPath = $env:SBDT_MSBUILDPATH
 	}
+	
     $MsBuild = Join-Path $MSBuildPath "MsBuild.exe"	
     $workingdir = Split-Path $script:MyInvocation.MyCommand.Path -Parent
     
     Write-Verbose "Adding Type $workingdir\bin\Microsoft.SqlServer.IntegrationServices.Build.dll"
     Add-Type -Path "$workingdir\bin\Microsoft.SqlServer.IntegrationServices.Build.dll"
-
-    & $MsBuild $SSISProjectPath /t:SSISBuild
+	write-verbose "$MsBuild"
+    & $MsBuild "$SSISProjectPath /t:SSISBuild"
     }
