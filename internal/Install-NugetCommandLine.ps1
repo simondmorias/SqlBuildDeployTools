@@ -8,7 +8,7 @@ Function Install-NugetCommandLine
         [Parameter(Mandatory = $false, ParameterSetName="SourcePath")]
         [string]$SourcePath,
 
-        [string]$Path = (Join-Path "${env:ProgramFiles(x86)}" "Nuget"),
+        [string]$Path = (Join-Path ${env:ProgramFiles(x86)} "Nuget"),
         [switch]$Force
     )
 
@@ -29,10 +29,10 @@ Function Install-NugetCommandLine
 
        if ($SourcePath) {
             try
-            {
-                Write-Verbose "Copying Nuget command line from $SourcePath to $Path"
+            {                
                 if(Test-Path $SourcePath)
                 {
+                    Write-Output "Copying Nuget command line from $SourcePath to $Path"
                     Copy-Item (Join-Path $SourcePath "nuget.exe") $Path
                 }
             }
@@ -42,28 +42,21 @@ Function Install-NugetCommandLine
                 throw
             }
 
-        } elseif ($Url)
+        } 
+        elseif ($Url) 
         {
             try 
             {
-                Write-Verbose "Downloading Nuget command line to $Path"
+                Write-Output "Installing Nuget command line to $Path"
                 Invoke-WebRequest $Url -OutFile $nugetExe -TimeoutSec 20
             }
             catch [System.Net.WebException]
             {
-                Write-Warning "Do you have internet connection? If not try using -SourcePath instead."
+                Write-Warning "Do you have an internet connection? If not try using -SourcePath instead."
                 throw            
             }
         }
-
-
-        # remove old nuget from the system path
-        # $env:path = ($env:path.Split(';') | Where-Object { $_ -notmatch 'nuget' }) -join ';'
-        
-        # add the new path
-        # $env:Path = "$env:Path;$Path;"
         Add-ToSystemPath $Path
-
         Write-Verbose "Path amended to: $env:Path"
 
         $nugetVersion = Get-NugetVersion
@@ -76,4 +69,5 @@ Function Install-NugetCommandLine
     } else {
         Write-Warning "Nuget $nugetVersion already installed. Skipping."
     }       
+    [System.Environment]::SetEnvironmentVariable("SBDT_NUGETPATH", $Path)
 }

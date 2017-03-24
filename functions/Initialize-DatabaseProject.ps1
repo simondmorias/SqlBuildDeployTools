@@ -1,28 +1,58 @@
-Function Initialize-DatabaseProject
+Function Initialize-DatabaseProject 
 {
-	param ( 
-		[string] $DatabaseSolutionFilePath,
+	# aka Build-DatabaseProject but we're being good and sticking with the approved verbs
+	param (
+		[parameter(Mandatory=$true)][ValidatePattern(
+			'.+\.sqlproj|.+\.sln'
+		)] 
+		[string] $DatabaseProjectPath,
+
 		[string] $targetVersion=14,
-		[string] $MicrosoftDataToolsPath="D:\Nuget\Microsoft.Data.Tools.Msbuild\lib\net40",
-		[string] $SSDTPath="D:\Nuget\Microsoft.Data.Tools.Msbuild\lib\net40",
-		[string] $BuildConfiguration="Debug",
-		[string] $MSBuildPath="C:\Windows\Microsoft.NET\Framework64\v4.0.30319",
-		[switch] $Verbose
+		[string] $MicrosoftDataToolsPath,		
+		[string] $MSBuildPath,
+		[string] $BuildConfiguration="Debug"
 		)
 
-	if($Verbose) { $VerbosePreference = "Continue" }
+	# populate environment variables
+	$NugetVersion = Get-NugetVersion
+	$MsBuildVersion = Get-MsBuildVersion
+	$MsDataToolsVersion = Get-MsDataToolsVersion
 
-
-	Write-Verbose "MSBuild Path is $MSBuildPath"
+	if([string]::IsNullOrEmpty($MicrosoftDataToolsPath))
+	{
+		$MicrosoftDataToolsPath = $env:SBDT_MSDATATOOLSPATH
+	}
+	if([string]::IsNullOrEmpty($MSBuildPath))
+	{
+		$MSBuildPath = $env:SBDT_MSBUILDPATH
+	}
+	
 	if (-not (Test-Path $MSBuildPath)){
-		#Oh dear 
-		Throw "It appears that MSBuild 2015 is not installed on this box. Do not attempt to use MicrosoftDataToolsMSBuild as MSBuild 2015 is a pre-requisite."
+		# MsBuild is not found, let's try and install from the internet
+		Write-Warning "MsBuild not found, attempting installation from the internet"
+		Install-MsBuild
+		$MsBuildVersion = Get-MsBuildVersion
+		if ([string]::IsNullOrEmpty($MsBuildVersion))
+		{
+			throw "MsBuild was not found and the attempt to install from the internet also failed."
+		}
+	}	
+
+	if(-not (Test-Path $MicrosoftDataToolsPath))
+	{
+		Write-Warning "Microsoft Data Tools not found. Attempting nuget install"
+		Install-MsDataTools
+		$MsDataToolsVersion = Get-MsDataToolsVersion
+		if ([string]::IsNullOrEmpty($MsDataToolsVersion))
+		{
+			throw "Ms Data Tools was not found and the attempt to install the Nuget Package also failed."
+		}		
 	}
 
 	$msbuild = "$MSBuildPath\msbuild.exe"
 
 	$arg1 = "/p:tv=$targetVersion"
-	$arg2 = "/p:SSDTPath=$SSDTPath"
+	$arg2 = "/p:SSDTPath=$MicrosoftDataToolsPath"
 	$arg3 = "/p:SQLDBExtensionsRefPath=$SQLDBExtensionsRefPath"
 	$arg4 = "/p:Configuration=$BuildConfiguration"
 
@@ -32,6 +62,5 @@ Function Initialize-DatabaseProject
 	Write-Verbose "Fourth Arguement passed to MSBuild is: $arg4"
 
 	Write-Verbose "$msbuild $DatabaseSolutionFilePath $arg1 $arg2 $arg3 $arg4"
-	& $msbuild $DatabaseSolutionFilePath $arg1 $arg2 $arg3 $arg4
-
+	& $msbuild $DatabaseProjectPath $arg1 $arg2 $arg3 $arg4
 }
