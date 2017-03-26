@@ -1,6 +1,7 @@
 Function Initialize-Solution 
 {
 	# aka Build-DatabaseProject but we're being good and sticking with the approved verbs
+	[cmdletbinding()]
 	param (
 		[parameter(Mandatory=$true)][ValidatePattern(
 			'.+\.sqlproj|.+\.sln'

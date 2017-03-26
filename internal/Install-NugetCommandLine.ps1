@@ -18,10 +18,10 @@ Function Install-NugetCommandLine
     }    
     
     $nugetVersion = Get-NugetVersion    
-    $nugetExe = Join-Path $Path "nuget.exe"
     
     if([string]::IsNullOrEmpty($nugetVersion) -or $Force)
     {
+        $nugetExe = Join-Path $Path "nuget.exe"
         if (! (Test-Path $Path))
         {
             New-Item $Path -ItemType Directory -Force > $null
@@ -48,7 +48,8 @@ Function Install-NugetCommandLine
             try 
             {
                 Write-Output "Installing Nuget command line to $Path"
-                Invoke-WebRequest $Url -OutFile $nugetExe -TimeoutSec 20
+                $wc = New-Object Net.WebClient
+                $wc.DownloadFile($url, $nugetExe)                                
             }
             catch [System.Net.WebException]
             {
@@ -67,7 +68,8 @@ Function Install-NugetCommandLine
         Write-Output "Installed nuget version $nugetVersion in $Path"
 
     } else {
-        Write-Warning "Nuget $nugetVersion already installed. Skipping."
+        $Path = Split-Path (get-command nuget).source
+        Write-Warning "Nuget $nugetVersion already installed in $Path. Skipping."
     }       
     [System.Environment]::SetEnvironmentVariable("SBDT_NUGETPATH", $Path)
 }

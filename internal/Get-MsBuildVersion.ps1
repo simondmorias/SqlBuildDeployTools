@@ -6,10 +6,12 @@ Function Get-MsBuildVersion
         [string]$MSBuildPath = (Join-Path ${env:ProgramFiles(x86)} "MSBuild\$version\Bin\MSBuild.exe")
     )
 
-    # add validation so that msbuild.exe is there
-    
-    if (Test-Path $MSBuildPath)
+    if([string]::IsNullOrEmpty($MSBuildPath))
     {
-        (& $MSBuildPath /version)[3]
-    } 
+        $MSBuildPath = $env:SBDT_MSBUILDPATH
+    }
+
+    $MsBuildVersion = (& $MSBuildPath /version)[3]
+    [System.Environment]::SetEnvironmentVariable("SBDT_MSBUILDPATH", (Split-Path $MSBuildPath))
+    return $MsBuildVersion
 }

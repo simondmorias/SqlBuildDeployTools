@@ -21,10 +21,6 @@ Describe "$module tests" -Tags 'General' {
 
         It "the module has functions as separate files in the $functionsDirectory directory" {
             "$functionsDirectory\*.ps1" | Should Exist
-        It "the module has functions as separate files in the $functionsDirectory directory" {
-            "$functionsDirectory\*.ps1" | Should Exist
-        It "the module has functions as separate files in the $functionsDirectory directory" {
-            "$functionsDirectory\*.ps1" | Should Exist
         }
 
          It "the module has internal functions as separate files in the $internalDirectory directory" {
@@ -33,10 +29,12 @@ Describe "$module tests" -Tags 'General' {
     }
 
     $internalFunctions = (
+        'Add-ToSystemPath',
         'Get-MsBuildVersion',
+        'Get-MsDataToolsVersion',
         'Get-NugetVersion',
-        'Install-MicrosoftDataTools',
         'Install-MsBuild',
+        'Install-MsDataTools',        
         'Install-NugetCommandLine',
         'Test-PsUserIsAdmin'
     )
@@ -55,7 +53,11 @@ Describe "$module tests" -Tags 'General' {
 
     $functions = (
         'Initialize-DatabaseProject',
-        'Initialize-SSISProject'
+        'Initialize-Solution',
+        'Initialize-SSISProject',
+        'Initialize-SSISProject',
+        'Publish-DatabaseProject',
+        'Publish-SSISProject'
     )
 
 

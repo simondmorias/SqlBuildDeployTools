@@ -9,8 +9,8 @@ $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '.Tests\.', '.'
 Describe "MsDataTools tests" -Tags 'Internal' {
 
     It 'Should install MsDataTools with no parameters' {
-        Install-MicrosoftDataTools -Verbose
-        $Version = Get-MicrosoftDataToolsVersion
+        Install-MsDataTools -Verbose
+        $Version = Get-MsDataToolsVersion
         $Version | should not beNullOrEmpty
         ($Version).Major | should be "13"
     }

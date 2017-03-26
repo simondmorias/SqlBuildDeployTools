@@ -50,7 +50,8 @@ Function Install-MsBuild
             try 
             {
                 Write-Verbose "Downloading MSBuildTools to $MSBuildToolsInstaller"
-                Invoke-WebRequest $url -OutFile $MSBuildToolsInstaller -TimeoutSec 20
+                $wc = New-Object Net.WebClient
+                $wc.DownloadFile($url, $MSBuildToolsInstaller)
             }
             catch [System.Net.WebException]
             {

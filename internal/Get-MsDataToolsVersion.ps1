@@ -11,7 +11,7 @@ Function Get-MsDataToolsVersion
         {
             try {
                 $SqlServerDacAssembly = Join-Path $Path "Microsoft.SqlServer.Dac.dll"
-                ([Reflection.AssemblyName]::GetAssemblyName($SqlServerDacAssembly)).Version                
+                return ([Reflection.AssemblyName]::GetAssemblyName($SqlServerDacAssembly)).Version                
             }
             catch {
                 throw
