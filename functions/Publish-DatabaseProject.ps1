@@ -23,9 +23,9 @@ Function Publish-DatabaseProject
         [string]$DacpacApplicationName = $DatabaseName,
         [string]$DacpacApplicationVersion = "1.0.0.0"
     )
-
+    $StartTime = Get-Date
 	$MsDataToolsVersion = Get-MsDataToolsVersion
-    Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nMsDataTools version: $MsDataToolsVersion"
+    Write-Verbose "MsDataTools version: $MsDataToolsVersion"
     
     Write-Verbose "Adding DacFx type"
     Add-Type -Path "$env:SBDT_MSDATATOOLSPATH\Microsoft.SqlServer.Dac.dll"
@@ -82,24 +82,25 @@ Function Publish-DatabaseProject
                     Write-Output "Registering dacpac on $InstanceName"
                     $dacServices.Register($DatabaseName, $DacpacApplicationName, $DacpacApplicationVersion)
                 }
-                Write-Output "Success"
             }
             'DACPAC_SCRIPT' {
                 $GeneratedScript = Join-Path (Split-Path $DACPACLocation) ($InstanceName.Replace('\','_') + "_$DatabaseName`_Deploy.sql")
                 Write-Output "Scripting deployment to $GeneratedScript"
                 $dacServices.GenerateDeployScript($dacpac, $DatabaseName, $dacProfile.DeployOptions, $null) > $GeneratedScript                   
-                Write-Output "Success"
             }
             'DACPAC_REPORT' {
                 $Report = Join-Path (Split-Path $DACPACLocation) ($InstanceName.Replace('\','_') + "_$DatabaseName`_DeployReport.xml")
                 Write-Output "Creating report at $Report" 
                 $dacServices.GenerateDeployReport($dacpac, $DatabaseName, $dacProfile.DeployOptions, $null) > $Report
-                Write-Output "Success"
             }
         }
+        $ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
+        $CompletionMessage = "Success. Time elapsed (HH:MM:SS:MS) {0:g}" -f $ElapsedTime
+        Write-Output $CompletionMessage
+
     }
     catch [Microsoft.SqlServer.Dac.DacServicesException] { 
-        throw ('Deployment failed: ''{0}'' Reason: ''{1}''' -f $_.Exception.Message, $_.Exception.InnerException.Message) 
+        throw ("Deployment failed: {0} Reason: {1}" -f $_.Exception.Message, $_.Exception.InnerException.Message) 
     }
     catch {
         throw

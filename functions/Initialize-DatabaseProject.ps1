@@ -3,9 +3,8 @@ Function Initialize-DatabaseProject
 	# aka Build-DatabaseProject but we're being good and sticking with the approved verbs
 	[cmdletbinding()]
 	param (
-		[parameter(Mandatory=$true)][ValidatePattern(
-			'.+\.sqlproj|.+\.sln'
-		)] 
+		[parameter(Mandatory=$true)]
+		# [ValidatePattern('.+\.sqlproj|.+\.sln')] 
 		[string] $DatabaseProjectPath,
 
 		[string] $targetVersion=14,
@@ -13,7 +12,6 @@ Function Initialize-DatabaseProject
 		[string] $MSBuildPath,
 		[string] $BuildConfiguration="Debug"
 		)
-
 	# populate environment variables
 	$NugetVersion = Get-NugetVersion
 	$MsBuildVersion = Get-MsBuildVersion
@@ -50,6 +48,18 @@ Function Initialize-DatabaseProject
 		}		
 	}
 
+	# if the directory was specified, find the name of the project file
+    if($DatabaseProjectPath.EndsWith('.sqlproj')) {
+        $DatabaseProjectFile = $DatabaseProjectPath      
+    }
+    elseif (Test-Path $DatabaseProjectPath -pathType container) {
+        if((Get-ChildItem $DatabaseProjectPath\*.sqlproj).Count -eq 1) {
+            $DatabaseProjectFile = Join-Path $DatabaseProjectPath (Get-ChildItem $DatabaseProjectPath *.sqlproj).Name
+        }
+        else {
+            throw "Can't find project file"
+        }
+    }
 	$msbuild = "$MSBuildPath\msbuild.exe"
 
 	$arg1 = "/p:tv=$targetVersion"
@@ -63,5 +73,6 @@ Function Initialize-DatabaseProject
 	Write-Verbose "Fourth Arguement passed to MSBuild is: $arg4"
 
 	Write-Verbose "$msbuild $DatabaseSolutionFilePath $arg1 $arg2 $arg3 $arg4"
-	& $msbuild $DatabaseProjectPath $arg1 $arg2 $arg3 $arg4
+	& $msbuild $DatabaseProjectFile $arg1 $arg2 $arg3 $arg4
+
 }
