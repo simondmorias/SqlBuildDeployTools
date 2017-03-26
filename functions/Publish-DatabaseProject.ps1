@@ -6,25 +6,22 @@ Function Publish-DatabaseProject
         [string]$DatabaseProjectPath,
 
         [string]$PublishProfile,
+
+        [ValidateSet('DACPAC_DEPLOY','DACPAC_SCRIPT','DACPAC_REPORT')]
+        [string]$DeployOption="DACPAC_DEPLOY",
         
-        [parameter(ParameterSetName="Connection")]
         [string]$InstanceName,
-
-        [parameter(ParameterSetName="Connection")]
         [string]$DatabaseName,
-
-        [parameter(ParameterSetName="Connection")]
         [string]$SqlLogin,
-
-        [parameter(ParameterSetName="Connection")]
         [string]$Password,
-
-        [parameter(ParameterSetName="Connection")][ValidateSet(
-            "2008-R2","2012","2014","2016"
-        )]
+        
+        [ValidateSet("2008-R2","2012","2014","2016")]
         [string]$SqlServerVersion,
 
-        [string]$Configuration="Debug"
+        [string]$Configuration='Debug',
+        [switch]$DacpacRegister,        
+        [string]$DacpacApplicationName = $DatabaseName,
+        [string]$DacpacApplicationVersion = "1.0.0.0"
     )
 
 	$MsDataToolsVersion = Get-MsDataToolsVersion
@@ -48,7 +45,6 @@ Function Publish-DatabaseProject
         }
     }
     
-    
     [xml]$ProjectFileContent = Get-Content $DatabaseProjectFile
     $DACPACLocation = "$DatabaseProjectPath\bin\$Configuration\" + $ProjectFileContent.Project.PropertyGroup.Name[0] + ".dacpac"
 
@@ -61,66 +57,51 @@ Function Publish-DatabaseProject
     Write-Verbose "`nDatabaseProjectPath: $DatabaseProjectPath`nDatabaseProjectFile: $DatabaseProjectFile`nDACPACLocation: $DACPACLocation"
     $dacServices = New-Object Microsoft.SqlServer.Dac.DacServices (Get-ConnectionString -InstanceName $InstanceName -DatabaseName $DatabaseName -SqlLogin $SqlLogin -Password $Password)
 
-    if($PSBoundParameters.ContainsKey($PublishProfile)) {
-        if((Get-ChildItem $DatabaseProjectPath\*.publish.xml).Count -eq 1) {
-            $PublishProfile = (Get-ChildItem $DatabaseProjectPath *.publish.xml).Name
+    if(-not ($PSBoundParameters.ContainsKey($PublishProfile))) {
+        if((Get-ChildItem $DatabaseProjectPath\*.publish.xml).Count -eq 1) {            
+            $PublishProfile = Join-Path $DatabaseProjectPath (Get-ChildItem $DatabaseProjectPath\*.publish.xml).Name
+            Write-Verbose "Using Publish Profile: $PublishProfile"
+        } else {
+            throw "$PublishProfile parameter was not specified and more than one publish profile was found. Please specify the -PublishProfile parameter and try again."
         }
     }
-    return $PublishProfile
-    
-    $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)
-
-    
-
-}
-
-
-
-
-function DeployDac([string] $databaseName, [string]$connectionString, [string]$sqlserverVersion, [string]$dacpacPath, [string]$dacpacApplicationName, [string]$dacpacApplicationVersion)
-{
-    $defaultDacPacApplicationVersion = "1.0.0.0"
-
-    if($PSBoundParameters.ContainsKey('dacpacApplicationVersion'))
-    {
-        $defaultDacPacApplicationVersion = $defaultDacPacApplicationVersion
+    if (Test-Path $PublishProfile) {
+        $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)
+    } else {
+        throw "$PublishProfile publish profile path is invalid. Name should end with .publish.xml"
     }
+    $dacPacDeployOptions = $dacProfile.DeployOptions
 
-    Load-DacFx -sqlserverVersion $sqlserverVersion
+    try {
+        switch ($DeployOption) {
+            'DACPAC_DEPLOY' {
+                Write-Output "Deploying database $DatabaseName to SQL Server instance $InstanceName"
+                $dacServices.Deploy($dacpac, $DatabaseName, "True", $dacProfile.DeployOptions, $null)        
 
-    $dacServicesObject = new-object Microsoft.SqlServer.Dac.DacServices ($connectionString)
-
-    $dacpacInstance = [Microsoft.SqlServer.Dac.DacPackage]::Load($dacpacPath)
-
-    try
-    {
-        $dacServicesObject.Deploy($dacpacInstance, $databaseName,$true) 
-
-        $dacServicesObject.Register($databaseName, $dacpacApplicationName,$defaultDacPacApplicationVersion)
-
-        Write-Verbose("Dac Deployed")
+                if($DacpacRegister) {
+                    Write-Output "Registering dacpac on $InstanceName"
+                    $dacServices.Register($DatabaseName, $DacpacApplicationName, $DacpacApplicationVersion)
+                }
+                Write-Output "Success"
+            }
+            'DACPAC_SCRIPT' {
+                $GeneratedScript = Join-Path (Split-Path $DACPACLocation) ($InstanceName.Replace('\','_') + "_$DatabaseName`_Deploy.sql")
+                Write-Output "Scripting deployment to $GeneratedScript"
+                $dacServices.GenerateDeployScript($dacpac, $DatabaseName, $dacProfile.DeployOptions, $null) > $GeneratedScript                   
+                Write-Output "Success"
+            }
+            'DACPAC_REPORT' {
+                $Report = Join-Path (Split-Path $DACPACLocation) ($InstanceName.Replace('\','_') + "_$DatabaseName`_DeployReport.xml")
+                Write-Output "Creating report at $Report" 
+                $dacServices.GenerateDeployReport($dacpac, $DatabaseName, $dacProfile.DeployOptions, $null) > $Report
+                Write-Output "Success"
+            }
+        }
     }
-    catch
-    {
-        $errorMessage = $_.Exception.Message
-        Write-Verbose('Dac Deploy Failed: ''{0}''' -f $errorMessage)
+    catch [Microsoft.SqlServer.Dac.DacServicesException] { 
+        throw ('Deployment failed: ''{0}'' Reason: ''{1}''' -f $_.Exception.Message, $_.Exception.InnerException.Message) 
     }
-}
-
-
-
-function Load-DacFx([string]$sqlserverVersion)
-{
-    $majorVersion = Get-SqlServerMajoreVersion -sqlServerVersion $sqlserverVersion
-
-    $DacFxLocation = "${env:ProgramFiles(x86)}\Microsoft SQL Server\$majorVersion\DAC\bin\Microsoft.SqlServer.Dac.dll"
-
-    try
-    {  
-        [System.Reflection.Assembly]::LoadFrom($DacFxLocation) | Out-Null
-    }
-    catch
-    {
-        Throw "$LocalizedData.DacFxInstallationError"
-    }
+    catch {
+        throw
+    }  
 }
