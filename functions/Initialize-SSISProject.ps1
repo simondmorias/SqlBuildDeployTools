@@ -25,6 +25,8 @@ Function Initialize-SSISProject
 			throw "MsBuild was not found and the attempt to install from the internet also failed."
 		}		
 	}
+
+	Write-Verbose "Installing SQL Feature Pack Pre-requisites if required"
 	
     $MsBuild = Join-Path $env:SBDT_MSBUILDPATH "MsBuild.exe"	
     $workingdir = Split-Path $script:MyInvocation.MyCommand.Path -Parent

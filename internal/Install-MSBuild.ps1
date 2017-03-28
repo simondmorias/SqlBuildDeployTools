@@ -36,7 +36,7 @@ Function Install-MsBuild
                     Copy-Item (Join-Path $SourcePath "BuildTools_Full.exe") $DownloadPath
                 }
                 else {
-                    throw "$SourcePath does not exist. Specify a valid location to obtain MsBuild installer."
+                    throw "$SourcePath does not exist. Specify a valid location for -SourcePath."
                 }
             }
             catch
@@ -79,6 +79,7 @@ Function Install-MsBuild
     if(! (Test-Path $MSBuildPath))
     {
         Write-Output "Installing MSBuildTools"    
+        Unblock-File $MSBuildToolsInstaller
         Start-Process -Wait $MSBuildToolsInstaller -ArgumentList "/quiet"
     }
         
