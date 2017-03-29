@@ -58,18 +58,7 @@ Function Install-SQLFeaturePackItem
     else {
         Write-Warning "$FeaturePackDownloadPath already exists and -Force not specified. Using existing downloaded file."
     }
-    $OutputFile = (Join-Path $DownloadPath ([system.io.fileinfo]$FeaturePackDownloadPath).BaseName) + '.txt'
-    Write-Output "Installing feature pack item $FeaturePackDownloadPath"
-    Unblock-File $FeaturePackDownloadPath
-    $arguments= " /qn /l*v $OutputFile"
-    try {
-        Start-Process -Wait $FeaturePackDownloadPath $arguments
-        Write-Output "Success. Output can be viewed in $OutputFile"
-    }
-    catch {
-        throw
-    }   
+    
+    Write-Output "Installing feature pack item $FeaturePackDownloadPath"    
+    Install-MSIPackage $FeaturePackDownloadPath 
 }
-
-
-

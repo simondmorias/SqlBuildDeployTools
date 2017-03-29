@@ -79,8 +79,7 @@ Function Install-MsBuild
     if(! (Test-Path $MSBuildPath))
     {
         Write-Output "Installing MSBuildTools"    
-        Unblock-File $MSBuildToolsInstaller
-        Start-Process -Wait $MSBuildToolsInstaller -ArgumentList "/quiet"
+        Install-MSIPackage $MSBuildToolsInstaller
     }
         
     if(! (Test-Path $MSBuildPath))
