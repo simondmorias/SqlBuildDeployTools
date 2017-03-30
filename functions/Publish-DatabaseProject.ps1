@@ -6,8 +6,7 @@ Function Publish-DatabaseProject
             Mandatory=$true)]
         [string]$DatabaseProjectPath,
         
-        [parameter(Position=1,
-            ParameterSetName="PublishProfile")]
+        [parameter(Position=1)]
         [string]$PublishProfile,
 
         [parameter(Position=2)]
@@ -71,31 +70,55 @@ Function Publish-DatabaseProject
     else {
         throw "Could not load dacpac from $DACPACLocation"
     }    
-    Write-Verbose "`nDatabaseProjectPath: $DatabaseProjectPath`nDatabaseProjectFile: $DatabaseProjectFile`nDACPACLocation: $DACPACLocation"
-    $dacServices = New-Object Microsoft.SqlServer.Dac.DacServices (Get-ConnectionString -InstanceName $InstanceName -DatabaseName $DatabaseName -SqlLogin $SqlLogin -Password $Password)
 
-    if(-not ($PSBoundParameters.ContainsKey($PublishProfile))) {
-        if((Get-ChildItem $DatabaseProjectPath\*.publish.xml).Count -eq 1) {            
+    if(-not ($PSBoundParameters.ContainsKey('PublishProfile'))) {
+        $PublishProfilesFound = (Get-ChildItem $DatabaseProjectPath\*.publish.xml).Count
+        if($PublishProfilesFound -eq 1) {            
             $PublishProfile = Join-Path $DatabaseProjectPath (Get-ChildItem $DatabaseProjectPath\*.publish.xml).Name
             Write-Verbose "Using Publish Profile: $PublishProfile"
         } else {
-            throw "$PublishProfile parameter was not specified and more than one publish profile was found. Please specify the -PublishProfile parameter and try again."
+            Write-Warning "-PublishProfile parameter was not specified. Could not find alternative Publish Profile, $PublishProfilesFound publish profiles found."
         }
     }
-    if (Test-Path $PublishProfile) {
+    if (-not([string]::IsNullOrEmpty($PublishProfile)) -and (Test-Path $PublishProfile)) {
+        Write-Verbose "Loading publish profile from $PublishProfile"
         $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)
         [xml]$PublishProfileContent = Get-Content $PublishProfile
     } else {
-        throw "$PublishProfile publish profile path is invalid. Name should end with .publish.xml"
+        Write-Warning "$PublishProfile publish profile not found. Using default deployment options"
+        if([string]::IsNullOrEmpty($dacProfile)) {
+            $dacProfile = New-Object Microsoft.SqlServer.Dac.DacDeployOptions -Property @{
+                'BlockOnPossibleDataLoss' = $true;
+                'DropObjectsNotInSource' = $false;
+                'ScriptDatabaseOptions' = $true;
+                'IgnorePermissions' = $true;
+                'IgnoreRoleMembership' = $true
+            }
+        }        
     }
-    $dacPacDeployOptions = $dacProfile.DeployOptions    
-
+        
     # if connection string and database name not specified, use the one in the publish profile
+    if(-not($PSBoundParameters.ContainsKey('InstanceName')) -and (-not $PSBoundParameters.ContainsKey('DatabaseName'))) {
+        Write-Verbose "InstanceName and DatabaseName not supplied. Attempting to discover from $PublishProfile publish profile"
+        $DatabaseName = $PublishProfileContent.Project.PropertyGroup.TargetDatabaseName
+
+        # Parsing connection string by looking at first element separated by ; then the part after the = sign
+        $InstanceName = ($PublishProfileContent.Project.PropertyGroup.TargetConnectionString.Split(';')[0]).Split('=')[1]
+
+        if([string]::IsNullOrEmpty($InstanceName) -or [string]::IsNullOrEmpty($DatabaseName)) {
+            throw "DatabaseName or InstanceName was not supplied and could not discover from publish profile $PublishProfile"
+        } else {
+            Write-Verbose "Discovered InstanceName: $InstanceName, DatabaseName: $DatabaseName"
+        }
+    }
+
+    Write-Verbose "`nDatabaseProjectPath: $DatabaseProjectPath`nDatabaseProjectFile: $DatabaseProjectFile`nDACPACLocation: $DACPACLocation"
+    $dacServices = New-Object Microsoft.SqlServer.Dac.DacServices (Get-ConnectionString -InstanceName $InstanceName -DatabaseName $DatabaseName -SqlLogin $SqlLogin -Password $Password)
 
     try {
         switch ($DeployOption) {
             'DACPAC_DEPLOY' {
-                Write-Output "Deploying database $DatabaseName to SQL Server instance $InstanceName"
+                Write-Output "Deploying database $DatabaseName to SQL Server instance $InstanceName..."
                 $dacServices.Deploy($dacpac, $DatabaseName, $true, $dacProfile.DeployOptions, $null)        
 
                 if($DacpacRegister) {
@@ -115,7 +138,7 @@ Function Publish-DatabaseProject
             }
         }
         $ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
-        $CompletionMessage = "Success. Time elapsed (HH:MM:SS:MS) {0:g}" -f $ElapsedTime
+        $CompletionMessage = "Success. Time elapsed: {0:g}" -f $ElapsedTime
         Write-Output $CompletionMessage
 
     }
