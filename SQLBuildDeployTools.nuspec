@@ -9,7 +9,6 @@
 	</metadata>
 	<files>
 	<!-- The Powershell Module -->
-	<file src="$id$\**\*.*" 
-			target="Content\$id$"/>
+	<file src="**\*.*" />
 	</files>
 </package>
