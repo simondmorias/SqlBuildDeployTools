@@ -9,6 +9,7 @@
 	</metadata>
 	<files>
 	<!-- The Powershell Module -->
-	<file src="**\*.*" />
+	<file src="**\*.*" 
+			target="Content\"/>
 	</files>
 </package>
