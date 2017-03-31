@@ -85,8 +85,7 @@ Function Publish-DatabaseProject
     }
     if (-not([string]::IsNullOrEmpty($PublishProfile)) -and (Test-Path $PublishProfile)) {
         Write-Verbose "Loading publish profile from $PublishProfile"
-        $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)
-        [xml]$PublishProfileContent = Get-Content $PublishProfile
+        $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)        
     } else {
         Write-Warning "$PublishProfile publish profile not found. Using default deployment options"
         if([string]::IsNullOrEmpty($dacProfile)) {
@@ -99,23 +98,33 @@ Function Publish-DatabaseProject
             }
         }        
     }
+    if(-not ([string]::IsNullOrEmpty($PublishProfile))) {
+        [xml]$PublishProfileContent = Get-Content $PublishProfile        
+    } else {        
+        if(-not ($PSBoundParameters.ContainsKey('InstanceName')) -or (-not ($PSBoundParameters.ContainsKey('DatabaseName')))) {
+            throw "Publish profile could not be loaded AND DatabaseName/InstanceName not specified/found."
+        }        
+    }
         
-    # if connection string and database name not specified, use the one in the publish profile
-    if(-not($PSBoundParameters.ContainsKey('InstanceName')) -and (-not $PSBoundParameters.ContainsKey('DatabaseName'))) {
-        Write-Verbose "InstanceName and DatabaseName not supplied. Attempting to discover from $PublishProfile publish profile"
+    # if instance name or database name not specified, use the one in the publish profile
+    if(-not($PSBoundParameters.ContainsKey('DatabaseName')) -and (-not [string]::IsNullOrEmpty($PublishProfileContent))) {
+        Write-Verbose "DatabaseName not specified. Attempting to discover from $PublishProfile"
         $DatabaseName = $PublishProfileContent.Project.PropertyGroup.TargetDatabaseName
-
-        # Parsing connection string by looking at first element separated by ; then the part after the = sign
+        Write-Verbose "DatabaseName: $DatabaseName"
+    }
+    if(-not($PSBoundParameters.ContainsKey('InstanceName')) -and (-not [string]::IsNullOrEmpty($PublishProfileContent))) {
+        Write-Verbose "InstanceName not specified. Attempting to discover from $PublishProfile"
         $InstanceName = ($PublishProfileContent.Project.PropertyGroup.TargetConnectionString.Split(';')[0]).Split('=')[1]
-
-        if([string]::IsNullOrEmpty($InstanceName) -or [string]::IsNullOrEmpty($DatabaseName)) {
-            throw "DatabaseName or InstanceName was not supplied and could not discover from publish profile $PublishProfile"
-        } else {
-            Write-Verbose "Discovered InstanceName: $InstanceName, DatabaseName: $DatabaseName"
-        }
+        Write-Verbose "InstanceName: $InstanceName"
+    }
+    if([string]::IsNullOrEmpty($InstanceName) -or [string]::IsNullOrEmpty($DatabaseName)) {
+        throw "DatabaseName or InstanceName was not supplied and could not discover from publish profile $PublishProfile"
+    } else {
+        Write-Verbose "Discovered InstanceName: $InstanceName, DatabaseName: $DatabaseName"
     }
 
     Write-Verbose "`nDatabaseProjectPath: $DatabaseProjectPath`nDatabaseProjectFile: $DatabaseProjectFile`nDACPACLocation: $DACPACLocation"
+    Write-Verbose "`nInstanceName: $InstanceName`nDatabaseName: $DatabaseName"
     $dacServices = New-Object Microsoft.SqlServer.Dac.DacServices (Get-ConnectionString -InstanceName $InstanceName -DatabaseName $DatabaseName -SqlLogin $SqlLogin -Password $Password)
 
     try {

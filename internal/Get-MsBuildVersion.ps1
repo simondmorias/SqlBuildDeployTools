@@ -1,13 +1,11 @@
-Function Get-MsBuildVersion
-{
+Function Get-MsBuildVersion {
     [cmdletbinding()]
     param (
         [string]$version = "14.0",
         [string]$MSBuildPath = (Join-Path ${env:ProgramFiles(x86)} "MSBuild\$version\Bin\MSBuild.exe")
     )
 
-    if([string]::IsNullOrEmpty($MSBuildPath))
-    {
+    if ([string]::IsNullOrEmpty($MSBuildPath)) {
         $MSBuildPath = $env:SBDT_MSBUILDPATH
     }
 
