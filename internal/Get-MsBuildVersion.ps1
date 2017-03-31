@@ -13,5 +13,5 @@ Function Get-MsBuildVersion
 
     $MsBuildVersion = (& $MSBuildPath /version)[3]
     [System.Environment]::SetEnvironmentVariable("SBDT_MSBUILDPATH", (Split-Path $MSBuildPath))
-    return $MsBuildVersion
+    return $MsBuildVersion 
 }

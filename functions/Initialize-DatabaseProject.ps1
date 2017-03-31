@@ -8,20 +8,21 @@ Function Initialize-DatabaseProject
 		[string] $DatabaseProjectPath,
 
 		[string] $targetVersion=14,
-		[string] $MicrosoftDataToolsPath,		
+		[string] $SqlServerDataToolsPath,		
 		[string] $MSBuildPath,
 		[string] $BuildConfiguration="Debug"
 		)
 	# populate environment variables
-	$NugetVersion = Get-NugetVersion
+	# $NugetVersion = Get-NugetVersion
 	$MsBuildVersion = Get-MsBuildVersion
-	$MsDataToolsVersion = Get-MsDataToolsVersion
+	# $MsDataToolsVersion = Get-MsDataToolsVersion
+	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
 
-	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nMsDataTools version: $MsDataToolsVersion"
+	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nMsDataTools version: $SqlServerDataToolsVersion"
 
-	if([string]::IsNullOrEmpty($MicrosoftDataToolsPath))
+	if([string]::IsNullOrEmpty($SqlServerDataToolsPath))
 	{
-		$MicrosoftDataToolsPath = $env:SBDT_MSDATATOOLSPATH
+		$SqlServerDataToolsPath = $env:SBDT_SQLSERVERDATATOOLSPATH
 	}
 	if([string]::IsNullOrEmpty($MSBuildPath))
 	{
@@ -38,14 +39,9 @@ Function Initialize-DatabaseProject
 		}
 	}	
 
-	if(-not (Test-Path $MicrosoftDataToolsPath))
+	if(-not (Test-Path $SqlServerDataToolsPath))
 	{
-		Write-Warning "Microsoft Data Tools not found. Attempting nuget install"
-		Install-MsDataTools
-		if ([string]::IsNullOrEmpty($env:SBDT_MSDATATOOLSPATH))
-		{
-			throw "Ms Data Tools was not found and the attempt to install the Nuget Package also failed."
-		}		
+		throw "Sql Server Data Tools not found. Install Sql Server Data Tools and try again."
 	}
 
 	# if the directory was specified, find the name of the project file
@@ -60,7 +56,7 @@ Function Initialize-DatabaseProject
             throw "Can't find project file"
         }
     }
-	$msbuild = "$MSBuildPath\msbuild.exe"
+	$msbuild = Join-Path $MSBuildPath "msbuild.exe"
 
 	$arg1 = "/p:tv=$targetVersion"
 	$arg2 = "/p:SSDTPath=$MicrosoftDataToolsPath"

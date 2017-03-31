@@ -40,11 +40,14 @@ Function Publish-DatabaseProject
         [string]$DacpacApplicationVersion = "1.0.0.0"
     )
     $StartTime = Get-Date
-	$MsDataToolsVersion = (Get-MsDataToolsVersion).Major
-    Write-Verbose "MsDataTools version: $MsDataToolsVersion"
+	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
+    Write-Verbose "SSDT version: $SqlServerDataToolsVersion"
     
-    Write-Verbose "Loading DacFx assembly"
-    Add-Type -Path "$env:SBDT_MSDATATOOLSPATH\Microsoft.SqlServer.Dac.dll"
+    $DacAssembly = 'Microsoft.SqlServer.Dac.dll'
+    $DacAssemblyPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\130"
+    
+    Write-Verbose "Loading DacFx assembly from $DacAssemblyPath\$DacAssembly"
+    Add-Type -Path (Join-Path $DacAssemblyPath $DacAssembly)
 
     # if the directory was specified, find the name of the sql project file
     if($DatabaseProjectPath.EndsWith('.sqlproj')) {
