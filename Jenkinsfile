@@ -9,8 +9,6 @@ node  {
 		checkout scm
 	}
 	// initialize
-	def jobBaseName = "${env.JOB_NAME}".split('/').last()
-
 	echo "Build Number: ${env.BUILD_NUMBER}"
 	echo "Build url: ${env.BUILD_URL}"
 	echo "Workspace: ${env.WORKSPACE}"
@@ -23,6 +21,6 @@ node  {
 	
 	stage ('publish') {
 		// publish  the Nuget package to the Nuget Repository
-		bat "nuget push ${jobBaseName}.${BUILD_NUMBER}.nupkg ${API_KEY} -Source ${NUGET_REPO}"  // publish to Nuget Repo
+		bat "nuget push ${jobBaseName}.${BUILD_NUMBER}.nupkg ${API_KEY} -Source ${NUGET_REPO}"
 	}
 }
