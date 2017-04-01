@@ -16,11 +16,11 @@ node  {
 	echo "JOB BASE NAME: ${JOB_BASE_NAME}"
 
 	stage ('package') {
-		bat "nuget pack ${JOB_BASE_NAME}.nuspec -properties id=${JOB_BASE_NAME};description=${BUILD_URL} -version ${BUILD_NUMBER}"
+		bat "nuget pack ${JOB_BASE_NAME}.${BUILD_NUMBER}.nuspec -properties id=${JOB_BASE_NAME};description=${BUILD_URL} -version ${BUILD_NUMBER}"
 	}
 	
 	stage ('publish') {
 		// publish  the Nuget package to the Nuget Repository
-		bat "nuget push ${JOB_BASE_NAME}.nupkg ${API_KEY} -Source ${NUGET_REPO}"
+		bat "nuget push ${JOB_BASE_NAME}.${BUILD_NUMBER}.nupkg ${API_KEY} -Source ${NUGET_REPO}"
 	}
 }
