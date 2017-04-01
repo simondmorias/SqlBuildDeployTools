@@ -6,10 +6,11 @@
 	<version>0</version>
 	<id>$id$</id>
 	<authors>Mark Allison</authors>
+	<projectUrl>https://github.com/sabinio/SqlBuildDeployTools</projectUrl>
 	</metadata>
 	<files>
 	<!-- The Powershell Module -->
-	<file src="**\*.*" 
-			target="Content\"/>
+	<file src="$id$\**\*.*" exclude="**\tests\*"
+				target="Content\$id$"/>
 	</files>
 </package>
