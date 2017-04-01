@@ -12,6 +12,6 @@
 	<!-- The Powershell Module -->
 	<file src="**\*.*" exclude="**\tests\*"
 				target="$id$\"/>
-	<file src="install.ps1" target="tools\">
+	<file src="install.ps1" target="tools\"/>
 	</files>
 </package>
