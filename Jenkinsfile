@@ -21,6 +21,6 @@ node  {
 	
 	stage ('publish') {
 		// publish  the Nuget package to the Nuget Repository
-		bat "nuget push ${jobBaseName}.${BUILD_NUMBER}.nupkg ${API_KEY} -Source ${NUGET_REPO}"
+		bat "nuget push ${JOB_BASE_NAME}.${BUILD_NUMBER}.nupkg ${API_KEY} -Source ${NUGET_REPO}"
 	}
 }
