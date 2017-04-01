@@ -10,7 +10,8 @@
 	</metadata>
 	<files>
 	<!-- The Powershell Module -->
-	<file src="$id$\**\*.*" exclude="**\tests\*"
-				target="Content\$id$"/>
+	<file src="**\*.*" exclude="**\tests\*"
+				target="$id$\"/>
+	<file src="install.ps1" target "tools\">
 	</files>
 </package>
