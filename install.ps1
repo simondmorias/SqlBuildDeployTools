@@ -1,2 +1,2 @@
-Import-Module ..\SqlBuildDeployTools -Force
-Write-Output "Install.ps1 ran ok" > C:\SqlBuildDeployTools.txt
+Copy-Item ..\SqlBuildDeployTools (Join-Path $env:ProgramFiles "WindowsPowerShell\Modules")
+Import-Module SqlBuildDeployTools -Force
