@@ -20,42 +20,49 @@ Function Install-NugetCommandLine
     $nugetVersion = Get-NugetVersion    
     
     if([string]::IsNullOrEmpty($nugetVersion) -or $Force)
-    {
-        $nugetExe = Join-Path $Path "nuget.exe"
-        if (! (Test-Path $Path))
-        {
-            New-Item $Path -ItemType Directory -Force > $null
-        }
+    {        
+        if ([string]::IsNullOrEmpty((choco))) {
+            Write-Verbose "chocolatey package manager not installed, trying the hard way..."   
+            $nugetExe = Join-Path $Path "nuget.exe"
+            if (! (Test-Path $Path))
+            {
+                New-Item $Path -ItemType Directory -Force > $null
+            }
 
-       if ($SourcePath) {
-            try
-            {                
-                if(Test-Path $SourcePath)
+            if ($SourcePath) {
+                try
+                {                
+                    if(Test-Path $SourcePath)
+                    {
+                        Write-Output "Copying Nuget command line from $SourcePath to $Path"
+                        Copy-Item (Join-Path $SourcePath "nuget.exe") $Path
+                    }
+                }
+                catch
                 {
-                    Write-Output "Copying Nuget command line from $SourcePath to $Path"
-                    Copy-Item (Join-Path $SourcePath "nuget.exe") $Path
+                    Write-Warning "Failed to copy nuget from $SourcePath. Do you have the correct permissions?"
+                    throw
+                }
+
+            } 
+            elseif ($Url) 
+            {
+                try 
+                {
+                    Write-Output "Installing Nuget command line to $Path"
+                    $wc = New-Object Net.WebClient
+                    $wc.DownloadFile($url, $nugetExe)                                
+                }
+                catch [System.Net.WebException]
+                {
+                    Write-Warning "Do you have an internet connection? If not try using -SourcePath instead."
+                    throw            
                 }
             }
-            catch
-            {
-                Write-Warning "Failed to copy nuget from $SourcePath. Do you have the correct permissions?"
-                throw
-            }
-
-        } 
-        elseif ($Url) 
-        {
-            try 
-            {
-                Write-Output "Installing Nuget command line to $Path"
-                $wc = New-Object Net.WebClient
-                $wc.DownloadFile($url, $nugetExe)                                
-            }
-            catch [System.Net.WebException]
-            {
-                Write-Warning "Do you have an internet connection? If not try using -SourcePath instead."
-                throw            
-            }
+        } else {
+            # if chocolatey is installed, use that
+            Write-Verbose "Installing nuget.commandline with chocolatey"
+            & choco install "nuget.commandline"
         }
         Add-ToSystemPath $Path
         Write-Verbose "Path amended to: $env:Path"
