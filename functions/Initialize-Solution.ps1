@@ -13,6 +13,8 @@ Function Initialize-Solution
 		[string] $MSBuildPath,
 		[string] $BuildConfiguration="Debug"
 		)
-        Initialize-DatabaseProject $DatabaseProjectPath $targetVersion $MicrosoftDataToolsPath $MSBuildPath $BuildConfiguration
+
+		Write-Error "NOT IMPLEMENTED YET"
+        # Initialize-DatabaseProject $DatabaseProjectPath $targetVersion $MicrosoftDataToolsPath $MSBuildPath $BuildConfiguration
 
 }

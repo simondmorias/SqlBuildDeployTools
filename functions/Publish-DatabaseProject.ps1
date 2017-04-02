@@ -1,5 +1,65 @@
 Function Publish-DatabaseProject
 {
+<#
+.SYNOPSIS 
+Publish-DatabaseProject deploys a Sql Server project to a Sql Server instance, or generates a deployment script.
+
+.DESCRIPTION
+This function uses SSDT to deploy a database project to a single SQL Server instance. The InstanceName and DatabaseName can be supplied using parameters or a publish profile can be supplied. If neither are supplied, the function tries to find a publish profile in the project root directory.
+
+.PARAMETER DatabaseProjectPath
+The path to the project file. This can be the folder or the .sqlproj file path.
+
+.PARAMETER PublishProfile
+The path to the publish profile. If not specified, the function will look for one in the root.
+
+.PARAMETER DeployOption
+Can be one of the following with a default of 'DACPAC_DEPLOY'
+    'DACPAC_DEPLOY': Deploys the dacpac to a SQL Server database.
+    'DACPAC_SCRIPT': Generates a deployment script in the dacpac location, but does not deploy to the target.
+    'DACPAC_REPORT': Generates an xml deployment report, but does not deploy to the target.
+
+.PARAMETER InstanceName
+The Sql Server instance to deploy to. If specified will override what is in the publish profile.
+
+.PARAMETER DatabaseName
+The database name to deploy to. If specified will override what is in the publish profile.
+
+.PARAMETER SqlLogin
+If using SQL Authentication, this is the SQL Login. Overrides the publish profile.
+
+.PARAMETER Password
+If using SQL Authentication, this is the password for the SQL Login. Overrides the publish profile.
+
+.PARAMETER BuildConfiguration
+The Build Configuration  to deploy. Default is Debug.
+
+.PARAMETER DacpacRegister
+Switch to specify whether to register the dacpac on the server or not. Defaults to off
+
+.PARAMETER DacpacApplicationName
+The name of the dacpac when registering with the server. Defaults to the database name
+
+.PARAMETER DacpacApplicationVersion
+The version number to be applied to the registered dacpac on the server.
+
+.PARAMETER Verbose
+Shows details of the deployment, if omitted minimal information is output.
+
+.NOTES
+Author: Mark Allison
+
+Requires: 
+	SQL Server Data Tools. This module will not auto-install it.
+	Nuget (if nuget is not detected, this function will try to install it)
+    Admin rights.
+    Account running the script must have CREATE DATABASE and db_owner privileges in the target database.
+
+.EXAMPLE   
+Publish-DatabaseProject -DatabaseProjectPath C:\Projects\MyDatabaseProject -PublishProfile C:\Projects\MyDatabaseProject\dev.publish.xml
+
+Deploys the project in C:\Projects\MyDatabaseProject to the server details in publish profile C:\Projects\MyDatabaseProject\dev.publish.xml
+#>    
     [cmdletbinding()]
     param (
         [parameter(Position=0,            
@@ -30,11 +90,7 @@ Function Publish-DatabaseProject
         [string]$Password,
         
         [parameter(Position=7)]
-        [ValidateSet("2008-R2","2012","2014","2016")]
-        [string]$SqlServerVersion,
-
-        [parameter(Position=8)]
-        [string]$Configuration='Debug',
+        [string]$BuildConfiguration='Debug',
         [switch]$DacpacRegister,        
         [string]$DacpacApplicationName = $DatabaseName,
         [string]$DacpacApplicationVersion = "1.0.0.0"
@@ -65,9 +121,9 @@ Function Publish-DatabaseProject
     }
     Write-Verbose "Database Project Path: $DatabaseProjectPath"
     Write-Verbose "Database Project File: $DatabaseProjectFile"
-    
+
     [xml]$ProjectFileContent = Get-Content $DatabaseProjectFile
-    $DACPACLocation = "$DatabaseProjectPath\bin\$Configuration\" + $ProjectFileContent.Project.PropertyGroup.Name[0] + ".dacpac"
+    $DACPACLocation = "$DatabaseProjectPath\bin\$BuildConfiguration\" + $ProjectFileContent.Project.PropertyGroup.Name[0] + ".dacpac"
     $DACPACLocation = (Get-ChildItem $DACPACLocation).FullName # get the absolute path
     Write-Verbose "Dacpac location: $DACPACLocation"
 

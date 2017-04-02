@@ -1,6 +1,43 @@
 Function Initialize-DatabaseProject 
 {
-	# aka Build-DatabaseProject but we're being good and sticking with the approved verbs
+<#
+.SYNOPSIS 
+Initialize-DatabaseProject builds a Sql Server project to produce a dacpac.
+
+.DESCRIPTION
+Builds a dapac using MSBuild from an SSDT project.
+
+.PARAMETER DatabaseProjectPath
+The path to the project file. This can be the folder or the .sqlproj file path.
+
+.PARAMETER DatabaseProjectPath
+Target version to build. Default is 14.
+
+.PARAMETER SqlServerDataToolsPath
+If Sql Server Data Tools has been installed in a different location to the default, specify it here.
+
+.PARAMETER MSBuildPath
+The path to MSBuild. If this is different to the default specify it here.
+
+.PARAMETER BuildConfiguration
+The configuration setting to build. Default is Debug.
+
+.PARAMETER Verbose
+Shows details of the build, if omitted minimal information is output.
+
+.NOTES
+Author: Mark Allison
+
+Requires: 
+	SQL Server Data Tools. This module will not auto-install it.
+	Nuget (if nuget is not detected, this function will try to install it)
+    Admin rights.
+
+.EXAMPLE   
+Initialize-DatabaseProject -DatabaseProjectPath C:\Projects\MyDatabaseProject
+
+Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProject
+#>
 	[cmdletbinding()]
 	param (
 		[parameter(Mandatory=$true)]
@@ -12,13 +49,12 @@ Function Initialize-DatabaseProject
 		[string] $MSBuildPath,
 		[string] $BuildConfiguration="Debug"
 		)
-	# populate environment variables
+	# populate environment variables & get versions
 	$NugetVersion = Get-NugetVersion
 	$MsBuildVersion = Get-MsBuildVersion
-	# $MsDataToolsVersion = Get-MsDataToolsVersion
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
 
-	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nMsDataTools version: $SqlServerDataToolsVersion"
+	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion"
 
 	if(-not ($PSBoundParameters.ContainsKey('SqlServerDataToolsPath'))) {
 		$SqlServerDataToolsPath = $env:SBDT_SQLSERVERDATATOOLSPATH
