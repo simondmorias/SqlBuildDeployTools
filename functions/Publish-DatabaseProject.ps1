@@ -63,6 +63,8 @@ Function Publish-DatabaseProject
             throw "Can't find project file"
         }
     }
+    Write-Verbose "Database Project Path: $DatabaseProjectPath"
+    Write-Verbose "Database Project File: $DatabaseProjectFile"
     
     [xml]$ProjectFileContent = Get-Content $DatabaseProjectFile
     $DACPACLocation = "$DatabaseProjectPath\bin\$Configuration\" + $ProjectFileContent.Project.PropertyGroup.Name[0] + ".dacpac"
