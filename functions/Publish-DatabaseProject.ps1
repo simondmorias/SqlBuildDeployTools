@@ -66,6 +66,8 @@ Function Publish-DatabaseProject
     
     [xml]$ProjectFileContent = Get-Content $DatabaseProjectFile
     $DACPACLocation = "$DatabaseProjectPath\bin\$Configuration\" + $ProjectFileContent.Project.PropertyGroup.Name[0] + ".dacpac"
+    $DACPACLocation = (Get-ChildItem $DACPACLocation).FullName # get the absolute path
+    Write-Verbose "Dacpac location: $DACPACLocation"
 
     if(Test-Path ($DACPACLocation)) {
         $dacpac = [Microsoft.SqlServer.Dac.DacPackage]::Load($DACPACLocation)
