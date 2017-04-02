@@ -13,30 +13,22 @@ Function Initialize-DatabaseProject
 		[string] $BuildConfiguration="Debug"
 		)
 	# populate environment variables
-	# $NugetVersion = Get-NugetVersion
+	$NugetVersion = Get-NugetVersion
 	$MsBuildVersion = Get-MsBuildVersion
 	# $MsDataToolsVersion = Get-MsDataToolsVersion
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
 
 	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nMsDataTools version: $SqlServerDataToolsVersion"
 
-	if([string]::IsNullOrEmpty($SqlServerDataToolsPath))
-	{
+	if(-not ($PSBoundParameters.ContainsKey('SqlServerDataToolsPath')) {
 		$SqlServerDataToolsPath = $env:SBDT_SQLSERVERDATATOOLSPATH
 	}
-	if([string]::IsNullOrEmpty($MSBuildPath))
-	{
+	if(-not ($PSBoundParameters.ContainsKey('MSBuildPath')) {
 		$MSBuildPath = $env:SBDT_MSBUILDPATH
 	}
 	
 	if (-not (Test-Path $MSBuildPath)){
-		# MsBuild is not found, let's try and install from the internet
-		Write-Warning "MsBuild not found, attempting installation from the internet"
-		Install-MsBuild
-		if ([string]::IsNullOrEmpty($env:SBDT_MSBUILDPATH))
-		{
-			throw "MsBuild was not found and the attempt to install from the internet also failed."
-		}
+		throw "MsBuild was not found."
 	}	
 
 	if(-not (Test-Path $SqlServerDataToolsPath))
