@@ -20,19 +20,18 @@ Function Initialize-DatabaseProject
 
 	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nMsDataTools version: $SqlServerDataToolsVersion"
 
-	if(-not ($PSBoundParameters.ContainsKey('SqlServerDataToolsPath')) {
+	if(-not ($PSBoundParameters.ContainsKey('SqlServerDataToolsPath'))) {
 		$SqlServerDataToolsPath = $env:SBDT_SQLSERVERDATATOOLSPATH
 	}
-	if(-not ($PSBoundParameters.ContainsKey('MSBuildPath')) {
+	if(-not ($PSBoundParameters.ContainsKey('MSBuildPath'))) {
 		$MSBuildPath = $env:SBDT_MSBUILDPATH
 	}
 	
-	if (-not (Test-Path $MSBuildPath)){
+	if (-not (Test-Path $MSBuildPath)) {
 		throw "MsBuild was not found."
 	}	
 
-	if(-not (Test-Path $SqlServerDataToolsPath))
-	{
+	if(-not (Test-Path $SqlServerDataToolsPath)) {
 		throw "Sql Server Data Tools not found. Install Sql Server Data Tools and try again."
 	}
 
