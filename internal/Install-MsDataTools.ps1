@@ -1,3 +1,4 @@
+# obsolete - not useing headless build now. SSDT must be installed
 Function Install-MsDataTools
 {
     [cmdletbinding()]

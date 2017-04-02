@@ -1,3 +1,4 @@
+# not required as SSDT takes care
 Function Install-MSIPackage {
     [cmdletbinding()]
     param (

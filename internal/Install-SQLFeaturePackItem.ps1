@@ -1,3 +1,4 @@
+# not required now as SSDT takes care of it
 Function Install-SQLFeaturePackItem
 {
     [cmdletbinding()]

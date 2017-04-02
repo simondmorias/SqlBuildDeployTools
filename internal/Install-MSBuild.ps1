@@ -1,3 +1,4 @@
+# no longer needed because it's installed with SSDT. Leaving here for now.
 Function Install-MsBuild
 {
     [cmdletbinding(DefaultParameterSetName="URL")]
