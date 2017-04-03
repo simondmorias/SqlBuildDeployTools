@@ -80,8 +80,8 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
     Write-Verbose "Arguments passed to devenv: $args"
     Write-Output "Building SSIS Project with $SqlServerDataToolsPath\devenv.com: $SSISProjectPath"
 
-    & $SqlServerDataToolsPath\devenv.com $args
-    # Start-Process -Wait -NoNewWindow "$SqlServerDataToolsPath\devenv.com" -ArgumentList $args # this command doesn't work under Jenkins
+    # & runas /netonly $SqlServerDataToolsPath\devenv.com $args
+    Start-Process -Wait -NoNewWindow "$SqlServerDataToolsPath\devenv.exe" -ArgumentList $args # this command doesn't work under Jenkins
     $ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
     
     # get the content of the log file because devenv doesn't do it when run within a powershell console
