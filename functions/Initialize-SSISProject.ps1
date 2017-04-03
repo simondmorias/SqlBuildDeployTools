@@ -57,6 +57,7 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
         throw "Sql Server Data Tools not found. Install Sql Server Data Tools and try again."		
     }	
     Write-Verbose "SqlServerDataTools version: $SqlServerDataToolsVersion"
+    Write-Verbose "SqlServerDataTools path: $SqlServerDataToolsPath"
 
     if (-not $PSBoundParameters.ContainsKey('SolutionPath')) {
         Write-Verbose "Solution path not supplied. Searching..."
@@ -72,7 +73,7 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
         "/project $SSISProjectPath"
     )  
     Write-Verbose "Arguments passed to devenv: $args"
-    Write-Output "Building SSIS Project: $SSISProjectPath"
+    Write-Output "Building SSIS Project with $SqlServerDataToolsPath\devenv.com: $SSISProjectPath"
 
     Start-Process "$SqlServerDataToolsPath\devenv.com" -ArgumentList $args -Wait -NoNewWindow
     $ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
