@@ -70,18 +70,28 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
     $SSISProjectPath = (Get-ChildItem "$(Split-Path $SSISProjectPath)" *.dtproj).FullName
 
     $dateStamp = Get-Date -Format yyyyMMddTHHmmss                
-    $logFile = '{0}-Log-{1}.xml' -f $SSISProjectPath, $dateStamp
+    $logFile = '{0}-Log-{1}.txt' -f $SSISProjectPath, $dateStamp
     $args = @(
         $SolutionPath
         "/rebuild $BuildConfiguration"
         "/project $SSISProjectPath"
-        "/log $logFile"
-    )  
+        "/out $logFile"
+    )
     Write-Verbose "Arguments passed to devenv: $args"
     Write-Output "Building SSIS Project with $SqlServerDataToolsPath\devenv.com: $SSISProjectPath"
 
-    Start-Process "$SqlServerDataToolsPath\devenv.com" -ArgumentList $args -Wait -NoNewWindow
+    Start-Process -Wait -NoNewWindow "$SqlServerDataToolsPath\devenv.com" -ArgumentList $args
     $ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
+    
+    # get the content of the log file because devenv doesn't do it when run within a powershell console
+    $logFileContent = Get-Content $logFile
+    $logFileContent
+    # throw an error if the word error appears in the log file 
+    foreach ($line in $logFileContent) {
+        if($line -match "[E|e]rror") {
+            throw "Error in build. $line"
+        }
+    }
     $CompletionMessage = "Success. Time elapsed: {0:g}" -f $ElapsedTime
     Write-Output $CompletionMessage	
 }
