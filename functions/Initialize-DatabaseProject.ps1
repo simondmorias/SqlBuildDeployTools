@@ -85,17 +85,14 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
     }
 	$msbuild = Join-Path $MSBuildPath "msbuild.exe"
 
-	$arg1 = "/p:tv=$targetVersion"
-	$arg2 = "/p:SSDTPath=$MicrosoftDataToolsPath"
-	$arg3 = "/p:SQLDBExtensionsRefPath=$MicrosoftDataToolsPath"
-	$arg4 = "/p:Configuration=$BuildConfiguration"
+    $args = @(
+        "/p:tv=$targetVersion"
+        "/p:SSDTPath=$MicrosoftDataToolsPath"
+        "/p:SQLDBExtensionsRefPath=$MicrosoftDataToolsPath"
+		"/p:Configuration=$BuildConfiguration"
+    )  
+	Write-Verbose "Arguments passed to MSBuild:`n$args"
 
-	Write-Verbose "First Arguement passed to MSBuild is: $arg1"
-	Write-Verbose "Second Arguement passed to MSBuild is: $arg2"
-	Write-Verbose "Third Arguement passed to MSBuild is: $arg3"
-	Write-Verbose "Fourth Arguement passed to MSBuild is: $arg4"
-
-	Write-Verbose "$msbuild $DatabaseSolutionFilePath $arg1 $arg2 $arg3 $arg4"
-	& $msbuild $DatabaseProjectFile $arg1 $arg2 $arg3 $arg4
-
+	Write-Verbose "$msbuild $DatabaseSolutionFilePath $args"
+	& $msbuild $DatabaseProjectFile $args
 }

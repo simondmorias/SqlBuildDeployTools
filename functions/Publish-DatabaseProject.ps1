@@ -99,13 +99,19 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
     Write-Verbose "SSDT version: $SqlServerDataToolsVersion"
     
-    $DacAssembly = 'Microsoft.SqlServer.Dac.dll'
-    $DacAssemblyPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\130"
-    
-    Write-Verbose "Loading DacFx assembly from $DacAssemblyPath\$DacAssembly"
-    Add-Type -Path (Join-Path $DacAssemblyPath $DacAssembly)
+    # try and load the DAC assembly
+    try {
+        $DacAssembly = 'Microsoft.SqlServer.Dac.dll'
+        $DacAssemblyPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\130"
+        Write-Verbose "Loading DacFx assembly from $DacAssemblyPath\$DacAssembly"
+        Add-Type -Path (Join-Path $DacAssemblyPath $DacAssembly)
+    }
+    catch {
+        Write-Warning "Could not load Dac Assembly from $DacAssemblyPath"
+        throw
+    }
 
-    # if the directory was specified, find the name of the sql project file
+    # if no full path specified for the database project file, find the name of the sql project file
     if($DatabaseProjectPath.EndsWith('.sqlproj')) {
         $DatabaseProjectFile = $DatabaseProjectPath 
         $DatabaseProjectPath = Split-Path $DatabaseProjectPath         
@@ -122,6 +128,7 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
     Write-Verbose "Database Project Path: $DatabaseProjectPath"
     Write-Verbose "Database Project File: $DatabaseProjectFile"
 
+    # load the dacpac
     [xml]$ProjectFileContent = Get-Content $DatabaseProjectFile
     $DACPACLocation = "$DatabaseProjectPath\bin\$BuildConfiguration\" + $ProjectFileContent.Project.PropertyGroup.Name[0] + ".dacpac"
     $DACPACLocation = (Get-ChildItem $DACPACLocation).FullName # get the absolute path
@@ -134,8 +141,9 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
         throw "Could not load dacpac from $DACPACLocation"
     }    
 
+    # Publish profile not specified let's try and find one
     if(-not ($PSBoundParameters.ContainsKey('PublishProfile'))) {
-        $PublishProfilesFound = (Get-ChildItem $DatabaseProjectPath\*.publish.xml).Count
+        [int]$PublishProfilesFound = (Get-ChildItem $DatabaseProjectPath\*.publish.xml).Count
         if($PublishProfilesFound -eq 1) {            
             $PublishProfile = Join-Path $DatabaseProjectPath (Get-ChildItem $DatabaseProjectPath\*.publish.xml).Name
             Write-Verbose "Using Publish Profile: $PublishProfile"
@@ -143,6 +151,8 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
             Write-Warning "-PublishProfile parameter was not specified. Could not find alternative Publish Profile, $PublishProfilesFound publish profiles found."
         }
     }
+
+    # if we have a pulblish profile and the path exists, load it. If not, specify some defaults
     if (-not([string]::IsNullOrEmpty($PublishProfile)) -and (Test-Path $PublishProfile)) {
         Write-Verbose "Loading publish profile from $PublishProfile"
         $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)        
@@ -158,6 +168,7 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
             }
         }        
     }
+    # read the publish profile if exists
     if(-not ([string]::IsNullOrEmpty($PublishProfile))) {
         [xml]$PublishProfileContent = Get-Content $PublishProfile        
     } else {        
@@ -177,6 +188,8 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
         $InstanceName = ($PublishProfileContent.Project.PropertyGroup.TargetConnectionString.Split(';')[0]).Split('=')[1]
         Write-Verbose "InstanceName: $InstanceName"
     }
+
+    # if we can't discover the instance name or database name we need to throw
     if([string]::IsNullOrEmpty($InstanceName) -or [string]::IsNullOrEmpty($DatabaseName)) {
         throw "DatabaseName or InstanceName was not supplied and could not discover from publish profile $PublishProfile"
     } else {
@@ -187,6 +200,7 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
     Write-Verbose "`nInstanceName: $InstanceName`nDatabaseName: $DatabaseName"
     $dacServices = New-Object Microsoft.SqlServer.Dac.DacServices (Get-ConnectionString -InstanceName $InstanceName -DatabaseName $DatabaseName -SqlLogin $SqlLogin -Password $Password)
 
+    # we got this far so let's deploy, script or report
     try {
         switch ($DeployOption) {
             'DACPAC_DEPLOY' {
