@@ -61,16 +61,21 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
 
     if (-not $PSBoundParameters.ContainsKey('SolutionPath')) {
         Write-Verbose "Solution path not supplied. Searching..."
-        $SolutionPath = (Get-ChildItem "$(Split-Path $SSISProjectPath)}\..\" *.sln).FullName 
+        $SolutionPath = (Get-ChildItem "$(Split-Path $SSISProjectPath)\..\" *.sln).FullName 
         if ([string]::IsNullOrEmpty($SolutionPath)) {
             throw "Solution path could not be found."
         }
     }
+    # get absolute project path
+    $SSISProjectPath = (Get-ChildItem "$(Split-Path $SSISProjectPath)" *.dtproj).FullName
 
+    $dateStamp = Get-Date -Format yyyyMMddTHHmmss                
+    $logFile = '{0}-Log-{1}.xml' -f $SSISProjectPath, $dateStamp
     $args = @(
         $SolutionPath
         "/rebuild $BuildConfiguration"
         "/project $SSISProjectPath"
+        "/log $logFile"
     )  
     Write-Verbose "Arguments passed to devenv: $args"
     Write-Output "Building SSIS Project with $SqlServerDataToolsPath\devenv.com: $SSISProjectPath"
