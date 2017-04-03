@@ -45,19 +45,20 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 		[string] $DatabaseProjectPath,
 
 		[string] $targetVersion=14,
-		[string] $SqlServerDataToolsPath,		
+		[string] $MsDataToolsPath,		
 		[string] $MSBuildPath,
 		[string] $BuildConfiguration="Debug"
 		)
 	# populate environment variables & get versions
 	$NugetVersion = Get-NugetVersion
 	$MsBuildVersion = Get-MsBuildVersion
+	$MsDataToolsVersion = Get-MsDataToolsVersion
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
 
-	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion"
+	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion"
 
-	if(-not ($PSBoundParameters.ContainsKey('SqlServerDataToolsPath'))) {
-		$SqlServerDataToolsPath = $env:SBDT_SQLSERVERDATATOOLSPATH
+	if(-not ($PSBoundParameters.ContainsKey('MsDataToolsPath'))) {
+		$MsDataToolsPath = $env:SBDT_MSDATATOOLSPATH
 	}
 	if(-not ($PSBoundParameters.ContainsKey('MSBuildPath'))) {
 		$MSBuildPath = $env:SBDT_MSBUILDPATH
@@ -67,8 +68,12 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 		throw "MsBuild was not found."
 	}	
 
-	if(-not (Test-Path $SqlServerDataToolsPath)) {
-		throw "Sql Server Data Tools not found. Install Sql Server Data Tools and try again."
+	if(-not (Test-Path $MsDataToolsPath)) {
+		Write-Warning "Ms Data Tools not found, attempting installation."		
+		Install-MsDataTools
+		if([string]::IsNullOrEmpty($env:SBDT_MSDATATOOLSPATH)) {
+			throw "Microsoft Data Tools package not found. Attempt to install also failed."
+		}
 	}
 
 	# if the directory was specified, find the name of the project file
@@ -87,8 +92,8 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 
     $args = @(
         "/p:tv=$targetVersion"
-        "/p:SSDTPath=$MicrosoftDataToolsPath"
-        "/p:SQLDBExtensionsRefPath=$MicrosoftDataToolsPath"
+        "/p:SSDTPath=$MsDataToolsPath"
+        "/p:SQLDBExtensionsRefPath=$MsDataToolsPath"
 		"/p:Configuration=$BuildConfiguration"
     )  
 	Write-Verbose "Arguments passed to MSBuild:`n$args"

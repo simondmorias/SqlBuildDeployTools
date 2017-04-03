@@ -1,9 +1,9 @@
-# obsolete - not useing headless build now. SSDT must be installed
 Function Install-MsDataTools
 {
     [cmdletbinding()]
     param (
-        [string]$DataToolsPath
+        [string]$DataToolsPath,
+        [string]$NugetPackageVersion
     )
 
     $nugetVersion = Get-NugetVersion
@@ -22,7 +22,19 @@ Function Install-MsDataTools
     try
     {
         Write-Output "Installing nuget package $nugetPackage"
-        & nuget.exe install $nugetPackage -ExcludeVersion -OutputDirectory $DataToolsPath
+        if($PSBoundParameters.ContainsKey('$NugetPackageVersion')) {
+            $args = @(
+                "-ExcludeVersion"
+                "-OutputDirectory $DataToolsPath"
+                "-Version $NugetPackageVersion"
+            )            
+        } else {
+            $args = @(
+                "-ExcludeVersion"
+                "-OutputDirectory $DataToolsPath"
+            )
+        }
+        & nuget.exe install $nugetPackage $args
     }
     catch
     {

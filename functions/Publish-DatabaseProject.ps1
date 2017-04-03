@@ -96,13 +96,19 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
         [string]$DacpacApplicationVersion = "1.0.0.0"
     )
     $StartTime = Get-Date
+    $MsDataToolsVersion = Get-MsDataToolsVersion
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
     Write-Verbose "SSDT version: $SqlServerDataToolsVersion"
     
     # try and load the DAC assembly
     try {
         $DacAssembly = 'Microsoft.SqlServer.Dac.dll'
-        $DacAssemblyPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\130"
+        if([string]::IsNullOrEmpty($env:SBDT_MSDATATOOLSPATH)) {
+            Write-Warning "Ms Data Tools could not be found. Trying to use SSDT path instead."
+            $DacAssemblyPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Microsoft\SQLDB\DAC\130"
+        } else {
+            $DacAssemblyPath = $env:SBDT_MSDATATOOLSPATH
+        }
         Write-Verbose "Loading DacFx assembly from $DacAssemblyPath\$DacAssembly"
         Add-Type -Path (Join-Path $DacAssemblyPath $DacAssembly)
     }
