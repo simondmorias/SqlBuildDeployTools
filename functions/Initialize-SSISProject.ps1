@@ -71,7 +71,9 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
         "/rebuild $BuildConfiguration"
         "/project $SSISProjectPath"
     )  
+    Write-Verbose "Arguments passed to devenv: $args"
     Write-Output "Building SSIS Project: $SSISProjectPath"
+
     Start-Process "$SqlServerDataToolsPath\devenv.com" -ArgumentList $args -Wait -NoNewWindow
     $ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
     $CompletionMessage = "Success. Time elapsed: {0:g}" -f $ElapsedTime
