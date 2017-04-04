@@ -16,7 +16,7 @@ node  {
 	echo "JOB BASE NAME: ${JOB_BASE_NAME}"
 
 	stage ('package') {
-		bat "nuget pack ${JOB_BASE_NAME}.nuspec -properties id=${JOB_BASE_NAME};description=${BUILD_URL} -version ${BUILD_NUMBER}"
+		bat "nuget pack ${JOB_BASE_NAME}.nuspec -properties id=${JOB_BASE_NAME};description=${BUILD_URL} -version ${BUILD_NUMBER} -NoPackageAnalysis"
 	}
 	
 	stage ('publish') {
