@@ -13,7 +13,7 @@ Parameters:
  * **[-BuildConfiguration]**: The configuration setting to build. Default is Debug.
  * **[-Verbose]**: Shows details of the build, if omitted minimal information is output.
 
- ### Example
+### Example
 
 `Initialize-DatabaseProject -DatabaseProjectPath C:\Projects\MyDatabaseProject`
 
@@ -66,4 +66,3 @@ Parameters:
  * Windows Server 2016
  * Windows Server 2012 R2
  * SQL Server 2016
- 
