@@ -2,7 +2,7 @@ Function Initialize-DatabaseProject
 {
 <#
 .SYNOPSIS 
-Initialize-DatabaseProject builds a Sql Server project to produce a dacpac.
+Builds a Sql Server Data Tools project to produce a .dacpac file.
 
 .DESCRIPTION
 Builds a dapac using MSBuild from an SSDT project. By default the build will be attempted using the Microsoft.Data.Tools.Msbuild nuget package. If this fails or does not exist, an installation is attempted.
@@ -10,7 +10,7 @@ Builds a dapac using MSBuild from an SSDT project. By default the build will be 
 .PARAMETER DatabaseProjectPath
 The path to the project file. This can be the folder or the .sqlproj file path.
 
-.PARAMETER DatabaseProjectPath
+.PARAMETER TargetVersion
 Target version to build. Default is 14.
 
 .PARAMETER SqlServerDataToolsPath
@@ -45,7 +45,7 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 		# [ValidatePattern('.+\.sqlproj|.+\.sln')] 
 		[string] $DatabaseProjectPath,
 
-		[string] $targetVersion=14,
+		[string] $TargetVersion=14,
 		[string] $MsDataToolsPath,		
 		[string] $MSBuildPath,
 		[string] $BuildConfiguration="Debug"

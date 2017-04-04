@@ -1,7 +1,7 @@
 Function Initialize-SSISProject {
 <#
 .SYNOPSIS 
-Initialize-SSISProject builds a Sql Server Integration Services project to produce a ispac.
+Builds a Sql Server Integration Services project to produce a .ispac file.
 
 .DESCRIPTION
 Builds a ispac using SSDT. Deploy it with Publish-SSISProject
