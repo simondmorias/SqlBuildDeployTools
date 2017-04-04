@@ -5,7 +5,7 @@ Function Initialize-DatabaseProject
 Initialize-DatabaseProject builds a Sql Server project to produce a dacpac.
 
 .DESCRIPTION
-Builds a dapac using MSBuild from an SSDT project.
+Builds a dapac using MSBuild from an SSDT project. By default the build will be attempted using the Microsoft.Data.Tools.Msbuild nuget package. If this fails or does not exist, an installation is attempted.
 
 .PARAMETER DatabaseProjectPath
 The path to the project file. This can be the folder or the .sqlproj file path.
@@ -29,8 +29,9 @@ Shows details of the build, if omitted minimal information is output.
 Author: Mark Allison
 
 Requires: 
-	SQL Server Data Tools. This module will not auto-install it.
-	Nuget (if nuget is not detected, this function will try to install it)
+	Microsoft.Data.Tools.Msbuild nuget package installed. This module will attempt to auto-install it if missing.
+	MSBuild installed. This module will attempt to auto-install it if missing.
+	Nuget installed. This module will attempt to auto-install it if missing.
     Admin rights.
 
 .EXAMPLE   
@@ -54,8 +55,9 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 	$MsBuildVersion = Get-MsBuildVersion
 	$MsDataToolsVersion = Get-MsDataToolsVersion
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
+	$DotNetFrameworkVersion = Get-DotNetVersion
 
-	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion"
+	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion`nDotNetVersio: $DotNetFrameworkVersion"
 
 	if(-not ($PSBoundParameters.ContainsKey('MsDataToolsPath'))) {
 		$MsDataToolsPath = $env:SBDT_MSDATATOOLSPATH
@@ -64,11 +66,15 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 		$MSBuildPath = $env:SBDT_MSBUILDPATH
 	}
 	
-	if (-not (Test-Path $MSBuildPath)) {
-		throw "MsBuild was not found."
+	if ([string]::IsNullOrEmpty ($MSBuildPath) -or (-not (Test-Path $MSBuildPath))) {
+		Write-Warning "MSBuild not found, attempting installation"
+		Install-MSBuild
+		if([string]::IsNullOrEmpty($env:SBDT_MSBUILDPATH) -or (-not (Test-Path ($env:SBDT_MSBUILDPATH)))) {
+			throw "MsBuild was not found."
+		}
 	}	
 
-	if(-not (Test-Path $MsDataToolsPath)) {
+	if([string]::IsNullOrEmpty($MsDataToolsPath) -or (-not (Test-Path $MsDataToolsPath))) {
 		Write-Warning "Ms Data Tools not found, attempting installation."		
 		Install-MsDataTools
 		if([string]::IsNullOrEmpty($env:SBDT_MSDATATOOLSPATH)) {

@@ -62,20 +62,6 @@ Function Install-MsBuild
         }              
     }
 
-    # remove MsBuild if it exists and -Force was specified - NOT WORKING 
-
-<#    if((Test-Path $MSBuildPath) -and $Force)
-    {
-        Unblock-File $MSBuildToolsInstaller
-        Write-Verbose "Removing old version of MSBuildTools"
-        Start-Process -Wait $MSBuildToolsInstaller -ArgumentList ("/uninstall", "/quiet")
-
-        if (Test-Path $MSBuildExe)
-        {
-            throw "Failed to uninstall old version of MsBuild."
-        }
-    }
-#>
     # install MsBuild if it doesn't exist
     if(! (Test-Path $MSBuildPath))
     {

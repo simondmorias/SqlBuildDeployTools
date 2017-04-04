@@ -50,8 +50,8 @@ Shows details of the deployment, if omitted minimal information is output.
 Author: Mark Allison
 
 Requires: 
-	SQL Server Data Tools. This module will not auto-install it.
-	Nuget (if nuget is not detected, this function will try to install it)
+	Microsoft.Data.Tools.Msbuild nuget package installed. This module will attempt to auto-install it if missing.
+	Nuget installed. This module will attempt to auto-install it if missing.
     Admin rights.
     Account running the script must have CREATE DATABASE and db_owner privileges in the target database.
 
@@ -98,7 +98,8 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
     $StartTime = Get-Date
     $MsDataToolsVersion = Get-MsDataToolsVersion
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
-    Write-Verbose "SSDT version: $SqlServerDataToolsVersion"
+    $DotNetFrameworkVersion = Get-DotNetVersion
+    Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion`nDotNetVersio: $DotNetFrameworkVersion"
     
     # try and load the DAC assembly
     try {

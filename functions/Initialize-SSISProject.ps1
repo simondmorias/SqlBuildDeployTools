@@ -28,6 +28,9 @@ Requires:
 	SQL Server Data Tools. This module will not auto-install it.
     Admin rights.
 
+Fails to build on Windows Server 2016 with:
+"Microsoft Visual Studio has detected a configuration issue. To correct this, please restart as Administrator. For more information please visit: http://go.microsoft.com/fwlink/?LinkId=558821"" 
+
 .EXAMPLE   
 Initialize-SSISProject -SSISProjectPath C:\Projects\MySSISProject
 
@@ -73,15 +76,14 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
     $logFile = '{0}-Log-{1}.txt' -f $SSISProjectPath, $dateStamp
     $args = @(
         $SolutionPath
-        "/rebuild $BuildConfiguration"
+        "/build $BuildConfiguration"
         "/project $SSISProjectPath"
         "/out $logFile"
     )
     Write-Verbose "Arguments passed to devenv: $args"
     Write-Output "Building SSIS Project with $SqlServerDataToolsPath\devenv.com: $SSISProjectPath"
 
-    # & runas /netonly $SqlServerDataToolsPath\devenv.com $args
-    Start-Process -Wait -NoNewWindow "$SqlServerDataToolsPath\devenv.exe" -ArgumentList $args # this command doesn't work under Jenkins
+    Start-Process -Wait -NoNewWindow "$SqlServerDataToolsPath\devenv.exe" -ArgumentList $args
     $ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
     
     # get the content of the log file because devenv doesn't do it when run within a powershell console
