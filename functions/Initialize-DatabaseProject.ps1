@@ -65,8 +65,7 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 	if(-not ($PSBoundParameters.ContainsKey('MSBuildPath'))) {
 		$MSBuildPath = $env:SBDT_MSBUILDPATH
 	}
-	
-	if ([string]::IsNullOrEmpty ($MSBuildPath) -or (-not (Test-Path $MSBuildPath))) {
+	if ([string]::IsNullOrEmpty($MSBuildPath) -or (-not(Test-Path $MSBuildPath))) {
 		Write-Warning "MSBuild not found, attempting installation"
 		Install-MSBuild
 		if([string]::IsNullOrEmpty($env:SBDT_MSBUILDPATH) -or (-not (Test-Path ($env:SBDT_MSBUILDPATH)))) {
