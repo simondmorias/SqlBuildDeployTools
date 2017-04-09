@@ -44,7 +44,8 @@ Deploys an ispac to instance MYINSTANCE in folder TestFolder from the build arti
 		[Parameter(Mandatory=$False,Position=4)] [string] $BuildConfiguration = 'Development',
 		[Parameter(Mandatory=$False,Position=5)] [String] $SSISCatalogName = 'SSISDB'
     )
-
+	
+	$StartTime = Get-Date
 	$NugetVersion = Get-NugetVersion
 	$MsBuildVersion = Get-MsBuildVersion
 	$MsDataToolsVersion = Get-MsDataToolsVersion
@@ -75,18 +76,27 @@ Deploys an ispac to instance MYINSTANCE in folder TestFolder from the build arti
 	#Check if Folder is already present, if not create one
 	if(!$ssisCatalog.Folders.Item($SSISFolderName))
 	{
+		Write-Verbose "$SSISFolderName does not exist, creating..."
 		(New-Object Microsoft.SqlServer.Management.IntegrationServices.CatalogFolder($ssisCatalog,$SSISFolderName,$null)).Create()
 	}
 
 	$ssisFolder = $ssisCatalog.Folders.Item($SSISFolderName)
-
-	if(!$ssisFolder.Projects.Item($SSISProjectName))
-	{
-		$ssisFolder.DeployProject($SSISProjectName,[System.IO.File]::ReadAllBytes($IspacPackagePath))
-	}
+	
+	Write-Verbose "Deploying project"
+	$ssisFolder.DeployProject($SSISProjectName,[System.IO.File]::ReadAllBytes($IspacPackagePath))
 
 	#Access deployed project
 	$ssisProject = $ssisFolder.Projects.Item($SSISProjectName)
+	try {
+		$ssisProject.Alter()
+	}
+	catch {
+		throw
+	}
+	$ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
 
-	$ssisProject.Alter()
+	$CompletionMessage = "Success. Time elapsed: {0:g}" -f $ElapsedTime
+    Write-Output $CompletionMessage
+
+	# TODO: Need some validation that the deployment succeeded
 }
