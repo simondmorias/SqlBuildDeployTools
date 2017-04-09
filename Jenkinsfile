@@ -17,7 +17,7 @@ node  {
 
 	stage ('test') {
 		timeout (5) {
-			bat 'powershell -Command $result = Invoke-Pester -PassThru; if (($result).FailedCount -gt 0) {Write-Error "$($result.FailedCount) tests failed"}'
+			bat 'powershell -Command $result = Invoke-Pester -PassThru; $result.TestResult | ? {$_.Passed -eq $false}; if (($result).FailedCount -gt 0) {Write-Error "$($result.FailedCount) tests failed"}; '
 		}
 	}
 
