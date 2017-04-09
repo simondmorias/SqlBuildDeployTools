@@ -96,10 +96,12 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
         [string]$DacpacApplicationVersion = "1.0.0.0"
     )
     $StartTime = Get-Date
+    $NugetVersion = Get-NugetVersion
+    $MsBuildVersion = Get-MsBuildVersion
     $MsDataToolsVersion = Get-MsDataToolsVersion
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
     $DotNetFrameworkVersion = Get-DotNetVersion
-    Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion`nDotNetVersio: $DotNetFrameworkVersion"
+    Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion`nDotNetVersion: $DotNetFrameworkVersion"
     
     # try and load the DAC assembly
     try {

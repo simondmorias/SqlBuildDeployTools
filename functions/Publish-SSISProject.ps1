@@ -32,9 +32,9 @@ Fails to build on Windows Server 2016 with:
 "Microsoft Visual Studio has detected a configuration issue. To correct this, please restart as Administrator. For more information please visit: http://go.microsoft.com/fwlink/?LinkId=558821"" 
 
 .EXAMPLE   
-Publish-SSISProject -SSISProjectPath C:\Projects\MySSISProject
+Publish-SSISProject -SSISInstanceName CROCUS -SSISFolderName MyTestProject -IspacProjectPath C:\Projects\MySSISProject\bin\Development
 
-Creates a ispac from the project found in directory C:\Projects\MySSISProject
+Deploys an ispac to server CROCUS in folder MyTestProject from the build artifact found in directory C:\Projects\MySSISProject\bin\Development
 #>
     [cmdletbinding()]
     param (

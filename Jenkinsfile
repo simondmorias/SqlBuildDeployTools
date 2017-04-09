@@ -15,12 +15,21 @@ node  {
 	echo "NUGET_REPO: ${NUGET_REPO}"	
 	echo "JOB BASE NAME: ${JOB_BASE_NAME}"
 
+	stage ('test') {
+		timeout (5) {
+			bat 'powershell -Command Invoke-Pester'
+		}
+	}
+
 	stage ('package') {
-		bat "nuget pack ${JOB_BASE_NAME}.nuspec -properties id=${JOB_BASE_NAME};description=${BUILD_URL} -version ${BUILD_NUMBER} -NoPackageAnalysis"
+		timeout (1) {
+			bat "nuget pack ${JOB_BASE_NAME}.nuspec -properties id=${JOB_BASE_NAME};description=${BUILD_URL} -version ${BUILD_NUMBER} -NoPackageAnalysis"
+		}
 	}
 	
 	stage ('publish') {
-		// publish  the Nuget package to the Nuget Repository
-		bat "nuget push ${JOB_BASE_NAME}.${BUILD_NUMBER}*.nupkg -Source ${NUGET_REPO}"
+		timeout (1) {
+			bat "nuget push ${JOB_BASE_NAME}.${BUILD_NUMBER}*.nupkg -Source ${NUGET_REPO}"
+		}
 	}
 }
