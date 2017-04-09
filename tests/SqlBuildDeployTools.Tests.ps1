@@ -29,6 +29,7 @@ Describe "$module tests" -Tags 'General' {
     }
 
     $internalFunctions = (
+
         'Add-ToSystemPath',
         'Get-ConnectionString',
         'Get-DotNetVersion',
