@@ -17,7 +17,7 @@ node  {
 
 	stage ('test') {
 		timeout (5) {
-			bat 'powershell -Command $results = Invoke-Pester -PassThru; foreach ($result in $results) {if($_.Passed -eq $false) {$result}}'
+			bat 'powershell -Command $results = Invoke-Pester -PassThru; foreach ($result in $results) {if($_.Passed -eq $false) {$result}};if($results.FailedCount -gt 0) {exit 1}'
 		}
 	}
 
