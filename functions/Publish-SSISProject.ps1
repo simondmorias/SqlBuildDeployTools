@@ -9,14 +9,17 @@ Deploys
 .PARAMETER SSISProjectPath
 The path to the SSIS project file. This can be the folder or the .dtproj file path.
 
-.PARAMETER SolutionPath
-The path to the solution that this SSIS project belongs to. Optional.
+.PARAMETER SSISInstanceName
+The name of the SQL Server instance to deploy the project to
 
-.PARAMETER SqlServerDataToolsPath
-If Sql Server Data Tools has been installed in a different location to the default, specify it here.
+.PARAMETER SSISFolderName
+The SSIS Folder to deploy to on the SSIS Instance
 
 .PARAMETER BuildConfiguration
 The configuration setting to build. Default is Development.
+
+.PARAMETER SSISCatalogName
+The name of the SSIS Catalog. Usually SSISDB
 
 .PARAMETER Verbose
 Shows details of the build, if omitted minimal information is output.
@@ -28,22 +31,18 @@ Requires:
 	SQL Server Data Tools. This module will not auto-install it.
     Admin rights.
 
-Fails to build on Windows Server 2016 with:
-"Microsoft Visual Studio has detected a configuration issue. To correct this, please restart as Administrator. For more information please visit: http://go.microsoft.com/fwlink/?LinkId=558821"" 
-
 .EXAMPLE   
-Publish-SSISProject -SSISInstanceName CROCUS -SSISFolderName MyTestProject -IspacProjectPath C:\Projects\MySSISProject\bin\Development
+Publish-SSISProject -SSISProjectPath C:\Projects\MySSISProject\MySSISProject.dtproj -SSISInstanceName MYINSTANCE -SSISFolderName TestFolder -Verbose
 
-Deploys an ispac to server CROCUS in folder MyTestProject from the build artifact found in directory C:\Projects\MySSISProject\bin\Development
+Deploys an ispac to instance MYINSTANCE in folder TestFolder from the build artifact found in directory C:\Projects\MySSISProject\bin\Development
 #>
     [cmdletbinding()]
     param (
-		[Parameter(Mandatory=$True,Position=1)] [String] $SSISInstanceName,
-		[Parameter(Mandatory=$True,Position=2)] [String] $SSISFolderName,
-		[Parameter(Mandatory=$True,Position=3)] [String] $SSISProjectName, # do we need this?
-		[Parameter(Mandatory=$True,Position=4)] [String] $IspacPackagePath,
-		[Parameter(Mandatory=$False,Position=5)] [String] $SSISCatalogName = "SSISDB",
-		[Parameter(Mandatory=$False,Position=6)] [Switch] $Force = $false
+		[parameter(Mandatory=$True,Position=1)][ValidatePattern('.+\.dtproj')] [string] $SSISProjectPath,
+		[Parameter(Mandatory=$True,Position=2)] [String] $SSISInstanceName,
+		[Parameter(Mandatory=$True,Position=3)] [String] $SSISFolderName,		
+		[Parameter(Mandatory=$False,Position=4)] [string] $BuildConfiguration = 'Development',
+		[Parameter(Mandatory=$False,Position=5)] [String] $SSISCatalogName = 'SSISDB'
     )
 
 	$NugetVersion = Get-NugetVersion
@@ -52,15 +51,23 @@ Deploys an ispac to server CROCUS in folder MyTestProject from the build artifac
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
 	$DotNetFrameworkVersion = Get-DotNetVersion
 
-	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion`nDotNetVersio: $DotNetFrameworkVersion"
+	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion`nDotNetVersion: $DotNetFrameworkVersion"
+	
+	# get absolute project path
+	$SSISProjectPath = (Get-ChildItem "$(Split-Path $SSISProjectPath)" *.dtproj).FullName
+	$IspacPackagePath = (Get-ChildItem (Join-Path (Split-Path $SSISProjectPath) "bin\$BuildConfiguration")).FullName
+
+	Write-Verbose "Loading assembly Microsoft.SqlServer.Management.IntegrationServices"
+	[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Management.IntegrationServices") > $null
 
 	$sqlConnectionString = "Data Source=$SSISInstanceName;Initial Catalog=master;Integrated Security=SSPI"
 	$sqlConnection = New-Object System.Data.SqlClient.SqlConnection $sqlConnectionString
 	$ssisServer = New-Object Microsoft.SqlServer.Management.IntegrationServices.IntegrationServices $sqlConnection
+	$SSISProjectName = [System.IO.Path]::GetFileNameWithoutExtension($SSISProjectPath)
 	
-	#Check if catalog is already present, if not create one
+	#Check if catalog is already present
 	if(!$ssisServer.Catalogs[$SSISCatalogName])	{
-		(New-Object Microsoft.SqlServer.Management.IntegrationServices.Catalog($SSISInstanceName, $SSISCatalogName,"P@ssword1")).Create()
+		throw "SSIS Catalog $SSISCatalogName does not exist on $SSISInstanceName. Create it and try again."
 	}
 
 	$ssisCatalog = $ssisServer.Catalogs[$SSISCatalogName]
@@ -68,21 +75,14 @@ Deploys an ispac to server CROCUS in folder MyTestProject from the build artifac
 	#Check if Folder is already present, if not create one
 	if(!$ssisCatalog.Folders.Item($SSISFolderName))
 	{
-		(New-Object Microsoft.SqlServer.Management.IntegrationServices.CatalogFolder($ssisCatalog,$SSISFolderName,"Powershell")).Create()
+		(New-Object Microsoft.SqlServer.Management.IntegrationServices.CatalogFolder($ssisCatalog,$SSISFolderName,$null)).Create()
 	}
 
 	$ssisFolder = $ssisCatalog.Folders.Item($SSISFolderName)
 
-	#Check if project is already deployed or not, if deployed drop it and deploy again
-<#	if($ssisFolder.Projects.Item($ssisProjectName))
-	{
-	$ssisFolder.Projects.Item($ssisProjectName).Drop()
-	}#>
-	$IspacResolvedPath = Resolve-Path ($IspacPackagePath)
-	
 	if(!$ssisFolder.Projects.Item($SSISProjectName))
 	{
-		$ssisFolder.DeployProject($SSISProjectName,[System.IO.File]::ReadAllBytes($IspacResolvedPath))
+		$ssisFolder.DeployProject($SSISProjectName,[System.IO.File]::ReadAllBytes($IspacPackagePath))
 	}
 
 	#Access deployed project
