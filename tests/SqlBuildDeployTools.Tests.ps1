@@ -30,12 +30,15 @@ Describe "$module tests" -Tags 'General' {
 
     $internalFunctions = (
         'Add-ToSystemPath',
+        'Get-ConnectionString',
+        'Get-DotNetVersion',
         'Get-MsBuildVersion',
         'Get-MsDataToolsVersion',
         'Get-NugetVersion',
         'Install-MsBuild',
         'Install-MsDataTools',        
         'Install-NugetCommandLine',
+        'Test-FileHash',
         'Test-PsUserIsAdmin'
     )
 
@@ -53,8 +56,6 @@ Describe "$module tests" -Tags 'General' {
 
     $functions = (
         'Initialize-DatabaseProject',
-        'Initialize-Solution',
-        'Initialize-SSISProject',
         'Initialize-SSISProject',
         'Publish-DatabaseProject',
         'Publish-SSISProject'

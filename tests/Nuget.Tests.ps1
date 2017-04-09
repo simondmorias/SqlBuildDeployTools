@@ -9,21 +9,21 @@ $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '.Tests\.', '.'
 Describe "Nuget tests" -Tags 'Internal' {
 
     It 'Should install Nuget from internet by default with no parameters' {
-        Install-NugetCommandLine -Verbose
+        Install-NugetCommandLine
          $version = Get-NugetVersion
          $version | should not beNullOrEmpty        
          $version | should match "\d\.\d\.\d\.\d+"
     }
 
     It 'Should install Nuget from internet idempotent with -Force' {
-        Install-NugetCommandLine -Force -Verbose
+        Install-NugetCommandLine -Force
          $version = Get-NugetVersion
          $version | should not beNullOrEmpty        
          $version | should match "\d\.\d\.\d\.\d+"
     }    
 
     It "Should install Nuget from file share $SourcePath idempotent with -Force" {
-        Install-NugetCommandLine -Force -SourcePath $SourcePath -Verbose
+        Install-NugetCommandLine -Force -SourcePath $SourcePath
          $version = Get-NugetVersion
          $version | should not beNullOrEmpty        
          $version | should match "\d\.\d\.\d\.\d+"
