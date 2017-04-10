@@ -55,7 +55,7 @@ Deploys an ispac to instance MYINSTANCE in folder TestFolder from the build arti
 	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion`nDotNetVersion: $DotNetFrameworkVersion"
 	
 	# get absolute project path
-	$SSISProjectPath = (Get-ChildItem "$(Split-Path $SSISProjectPath)" *.dtproj).FullName
+	$SSISProjectPath = 	Get-ProjectFullPath $SSISProjectPath ".dtproj"
 	$IspacPackagePath = (Get-ChildItem (Join-Path (Split-Path $SSISProjectPath) "bin\$BuildConfiguration")).FullName
 
 	Write-Verbose "Loading assembly Microsoft.SqlServer.Management.IntegrationServices"

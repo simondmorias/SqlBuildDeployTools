@@ -54,12 +54,24 @@ Parameters:
 ### Example
 `Publish-DatabaseProject -DatabaseProjectPath C:\Projects\MyDatabaseProject -PublishProfile C:\Projects\MyDatabaseProject\dev.publish.xml`
 
+## Publish-SSISProject
+Deploys a Sql Server Integration Services project to a SSIS Server
+
+ * **-SSISProjectPath**: The path to the SSIS project file. This can be the folder or the .dtproj file path.
+ * **-SSISInstanceName**: The name of the SQL Server instance to deploy the project to
+ * **-SSISFolderName**: The SSIS Folder to deploy to on the SSIS Instance
+ * **[-BuildConfiguration]**: The configuration setting to build. Default is Development.
+ * **[-SSISCatalogName]**: The name of the SSIS Catalog. Default is SSISDB
+
+ ### Example
+`Publish-SSISProject -SSISProjectPath C:\Projects\MySSISProject -SSISInstanceName MYINSTANCE -SSISFolderName TestFolder -Verbose`
+
 # Requirements
  * Admin rights where it is run from.
  * Nuget command line. This module will attempt to auto-install it if missing.
  * Microsoft.Data.Tools.Msbuild nuget package. This module will attempt to auto-install it if missing.
  * MSBuild. This module will attempt to auto-install it if missing.
- * SQL Server Data Tools in order to build and deploy SSIS Projects. Will not be auto-installed if missing.
+ * SQL Server Data Tools if you want to build and deploy SSIS Projects. Will not be auto-installed if missing.
 
 # Tested on
  * Windows 10

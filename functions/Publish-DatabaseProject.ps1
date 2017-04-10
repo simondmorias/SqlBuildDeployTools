@@ -121,19 +121,7 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
     }
 
     # if no full path specified for the database project file, find the name of the sql project file
-    if($DatabaseProjectPath.EndsWith('.sqlproj')) {
-        $DatabaseProjectFile = $DatabaseProjectPath 
-        $DatabaseProjectPath = Split-Path $DatabaseProjectPath         
-    }
-    elseif (Test-Path $DatabaseProjectPath -pathType container) {
-        if((Get-ChildItem $DatabaseProjectPath\*.sqlproj).Count -eq 1) {
-            $DatabaseProjectFile = Join-Path $DatabaseProjectPath (Get-ChildItem $DatabaseProjectPath *.sqlproj).Name
-            $DatabaseProjectPath = $DatabaseProjectPath.TrimEnd('\')
-        }
-        else {
-            throw "Can't find project file"
-        }
-    }
+	$DatabaseProjectFile = Get-ProjectFullPath $DatabaseProjectPath ".sqlproj"    
     Write-Verbose "Database Project Path: $DatabaseProjectPath"
     Write-Verbose "Database Project File: $DatabaseProjectFile"
 

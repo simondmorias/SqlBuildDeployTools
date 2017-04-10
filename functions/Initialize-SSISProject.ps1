@@ -38,11 +38,7 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
 #>
     [cmdletbinding()]
     param (
-        [parameter(Mandatory = $true)][ValidatePattern(
-            '.+\.dtproj'
-        )]		 
-        [string] $SSISProjectPath,
-		
+        [parameter(Mandatory=$true)][string] $SSISProjectPath,		
         [string] $SolutionPath,
         [string] $SqlServerDataToolsPath,
         [string] $BuildConfiguration = "Development"
@@ -69,8 +65,8 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
             throw "Solution path could not be found."
         }
     }
-    # get absolute project path
-    $SSISProjectPath = (Get-ChildItem "$(Split-Path $SSISProjectPath)" *.dtproj).FullName
+    # get absolute project path in case a directory was passed
+    $SSISProjectPath = 	Get-ProjectFullPath $SSISProjectPath ".dtproj"
 
     $dateStamp = Get-Date -Format yyyyMMddTHHmmss                
     $logFile = '{0}-Log-{1}.txt' -f $SSISProjectPath, $dateStamp

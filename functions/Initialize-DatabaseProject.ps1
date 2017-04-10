@@ -41,10 +41,9 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 #>
 	[cmdletbinding()]
 	param (
-		[parameter(Mandatory=$true)]
+		[parameter(Mandatory=$true)][string] $DatabaseProjectPath,
 		# [ValidatePattern('.+\.sqlproj|.+\.sln')] 
-		[string] $DatabaseProjectPath,
-
+		
 		[string] $TargetVersion=14,
 		[string] $MsDataToolsPath,		
 		[string] $MSBuildPath,
@@ -82,17 +81,7 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 	}
 
 	# if the directory was specified, find the name of the project file
-    if($DatabaseProjectPath.EndsWith('.sqlproj')) {
-        $DatabaseProjectFile = $DatabaseProjectPath      
-    }
-    elseif (Test-Path $DatabaseProjectPath -pathType container) {
-        if((Get-ChildItem $DatabaseProjectPath\*.sqlproj).Count -eq 1) {
-            $DatabaseProjectFile = Join-Path $DatabaseProjectPath (Get-ChildItem $DatabaseProjectPath *.sqlproj).Name
-        }
-        else {
-            throw "Can't find project file"
-        }
-    }
+	$DatabaseProjectFile = Get-ProjectFullPath $DatabaseProjectPath ".sqlproj"
 	$msbuild = Join-Path $MSBuildPath "msbuild.exe"
 
     $args = @(
