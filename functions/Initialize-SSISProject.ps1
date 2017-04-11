@@ -58,6 +58,9 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
     Write-Verbose "SqlServerDataTools version: $SqlServerDataToolsVersion"
     Write-Verbose "SqlServerDataTools path: $SqlServerDataToolsPath"
 
+    # get absolute project path in case a directory was passed
+    $SSISProjectPath = 	Get-ProjectFullPath $SSISProjectPath ".dtproj"
+
     if (-not $PSBoundParameters.ContainsKey('SolutionPath')) {
         Write-Verbose "Solution path not supplied. Searching..."
         $SolutionPath = (Get-ChildItem "$(Split-Path $SSISProjectPath)\..\" *.sln).FullName 
@@ -65,9 +68,7 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
             throw "Solution path could not be found."
         }
     }
-    # get absolute project path in case a directory was passed
-    $SSISProjectPath = 	Get-ProjectFullPath $SSISProjectPath ".dtproj"
-
+    
     $dateStamp = Get-Date -Format yyyyMMddTHHmmss                
     $logFile = '{0}-Log-{1}.txt' -f $SSISProjectPath, $dateStamp
     $arguments = @(
