@@ -70,16 +70,16 @@ Creates a ispac from the project found in directory C:\Projects\MySSISProject
 
     $dateStamp = Get-Date -Format yyyyMMddTHHmmss                
     $logFile = '{0}-Log-{1}.txt' -f $SSISProjectPath, $dateStamp
-    $args = @(
+    $arguments = @(
         $SolutionPath
         "/build $BuildConfiguration"
         "/project $SSISProjectPath"
         "/out $logFile"
     )
-    Write-Verbose "Arguments passed to devenv: $args"
+    Write-Verbose "Arguments passed to devenv: $arguments"
     Write-Output "Building SSIS Project with $SqlServerDataToolsPath\devenv.com: $SSISProjectPath"
 
-    Start-Process -Wait -NoNewWindow "$SqlServerDataToolsPath\devenv.com" -ArgumentList $args    
+    Start-Process -Wait -NoNewWindow "$SqlServerDataToolsPath\devenv.com" -ArgumentList $arguments    
     $ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
     
     # get the content of the log file because devenv doesn't do it when run within a powershell console
