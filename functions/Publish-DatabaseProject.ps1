@@ -122,9 +122,11 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
 
     # if no full path specified for the database project file, find the name of the sql project file
 	$DatabaseProjectFile = Get-ProjectFullPath $DatabaseProjectPath ".sqlproj"    
+
     Write-Verbose "Database Project Path: $DatabaseProjectPath"
     Write-Verbose "Database Project File: $DatabaseProjectFile"
 
+return
     # load the dacpac
     [xml]$ProjectFileContent = Get-Content $DatabaseProjectFile
     $DACPACLocation = "$DatabaseProjectPath\bin\$BuildConfiguration\" + $ProjectFileContent.Project.PropertyGroup.Name[0] + ".dacpac"
