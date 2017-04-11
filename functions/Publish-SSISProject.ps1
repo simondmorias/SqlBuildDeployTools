@@ -81,22 +81,23 @@ Deploys an ispac to instance MYINSTANCE in folder TestFolder from the build arti
 	}
 
 	$ssisFolder = $ssisCatalog.Folders.Item($SSISFolderName)
-	
-	Write-Verbose "Deploying project"
-	$ssisFolder.DeployProject($SSISProjectName,[System.IO.File]::ReadAllBytes($IspacPackagePath))
 
-	#Access deployed project
-	$ssisProject = $ssisFolder.Projects.Item($SSISProjectName)
-	try {
+	try {	
+		Write-Verbose "Deploying project"
+		$output = $ssisFolder.DeployProject($SSISProjectName,[System.IO.File]::ReadAllBytes($IspacPackagePath))
+		$ssisProject = $ssisFolder.Projects.Item($SSISProjectName)
 		$ssisProject.Alter()
 	}
 	catch {
 		throw
 	}
-	$ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
-
-	$CompletionMessage = "Success. Time elapsed: {0:g}" -f $ElapsedTime
-    Write-Output $CompletionMessage
-
-	# TODO: Need some validation that the deployment succeeded
+	
+	if ($output.Status -eq 'Success' -and $output.Completed -eq $true) {
+		$ElapsedTime = (New-TimeSpan –Start $StartTime –End (Get-Date))
+		$CompletionMessage = "Success. Time elapsed: {0:g}" -f $ElapsedTime
+		Write-Output $CompletionMessage
+	} else {
+		$output.ToString()
+		throw "Error in deployment"
+	}
 }

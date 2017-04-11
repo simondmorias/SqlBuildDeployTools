@@ -52,6 +52,7 @@ Parameters:
  * **[-Verbose]**: Shows details of the deployment, if omitted minimal information is output.
 
 ### Example
+
 `Publish-DatabaseProject -DatabaseProjectPath C:\Projects\MyDatabaseProject -PublishProfile C:\Projects\MyDatabaseProject\dev.publish.xml`
 
 ## Publish-SSISProject
@@ -63,7 +64,8 @@ Deploys a Sql Server Integration Services project to a SSIS Server
  * **[-BuildConfiguration]**: The configuration setting to build. Default is Development.
  * **[-SSISCatalogName]**: The name of the SSIS Catalog. Default is SSISDB
 
- ### Example
+### Example
+
 `Publish-SSISProject -SSISProjectPath C:\Projects\MySSISProject -SSISInstanceName MYINSTANCE -SSISFolderName TestFolder -Verbose`
 
 # Requirements
