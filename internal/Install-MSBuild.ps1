@@ -66,7 +66,7 @@ Function Install-MsBuild
     if(-not (Test-Path $MSBuildPath) -or $Force)
     {
         Write-Output "Installing MSBuildTools"    
-        # Install-MSIPackage $MSBuildToolsInstaller # no
+        Unblock-File $MSBuildToolsInstaller
         Start-Process -Wait $MSBuildToolsInstaller -ArgumentList "/quiet"
     }
         
