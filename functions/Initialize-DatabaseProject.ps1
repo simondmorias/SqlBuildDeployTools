@@ -13,8 +13,8 @@ The path to the project file. This can be the folder or the .sqlproj file path.
 .PARAMETER TargetVersion
 Target version to build. Default is 14.
 
-.PARAMETER SqlServerDataToolsPath
-If Sql Server Data Tools has been installed in a different location to the default, specify it here.
+.PARAMETER MsDataToolsPath
+If you want to specify the path to the Microsoft.Data.Tools package, specify it here. Not required.
 
 .PARAMETER MSBuildPath
 The path to MSBuild. If this is different to the default specify it here.
@@ -56,28 +56,31 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
 	$DotNetFrameworkVersion = Get-DotNetVersion
 
-	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion`nDotNetVersio: $DotNetFrameworkVersion"
+	Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion`nDotNetVersion: $DotNetFrameworkVersion"
 
-	if(-not ($PSBoundParameters.ContainsKey('MsDataToolsPath'))) {
-		$MsDataToolsPath = $env:SBDT_MSDATATOOLSPATH
-	}
 	if(-not ($PSBoundParameters.ContainsKey('MSBuildPath'))) {
 		$MSBuildPath = $env:SBDT_MSBUILDPATH
 	}
+
 	if ([string]::IsNullOrEmpty($MSBuildPath) -or (-not(Test-Path $MSBuildPath))) {
 		Write-Warning "MSBuild not found, attempting installation"
 		Install-MSBuild
 		if([string]::IsNullOrEmpty($env:SBDT_MSBUILDPATH) -or (-not (Test-Path ($env:SBDT_MSBUILDPATH)))) {
 			throw "MsBuild was not found."
 		}
+		$MSBuildPath = $env:SBDT_MSBUILDPATH
 	}	
 
+	if(-not ($PSBoundParameters.ContainsKey('MsDataToolsPath'))) {
+		$MsDataToolsPath = $env:SBDT_MSDATATOOLSPATH
+	}
 	if([string]::IsNullOrEmpty($MsDataToolsPath) -or (-not (Test-Path $MsDataToolsPath))) {
 		Write-Warning "Ms Data Tools not found, attempting installation."		
 		Install-MsDataTools
 		if([string]::IsNullOrEmpty($env:SBDT_MSDATATOOLSPATH)) {
 			throw "Microsoft Data Tools package not found. Attempt to install also failed."
 		}
+		$MsDataToolsPath = $env:SBDT_MSDATATOOLSPATH
 	}
 
 	# if the directory was specified, find the name of the project file

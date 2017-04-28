@@ -2,8 +2,8 @@ Function Get-ProjectFullPath
 {
     [cmdletbinding()]
     param(
-        $ProjectPath,
-        $ProjectFileExtension
+        [Parameter(Mandatory = $true)]$ProjectPath,
+        [Parameter(Mandatory = $true)]$ProjectFileExtension
     )
     if (-not ($ProjectPath.EndsWith($ProjectFileExtension))) {
         Write-Verbose "$ProjectPath does not end with $ProjectFileExtension"
@@ -14,7 +14,7 @@ Function Get-ProjectFullPath
                 return (Get-ChildItem $ProjectPath\*$ProjectFileExtension).FullName
             }
             else {
-                throw "Can't find project file"
+                throw "Can't find project file. This should be the path to the $ProjectFileExtension file, not the solution."
             }
         }
     } else {

@@ -22,19 +22,12 @@ Function Install-MsDataTools
     try
     {
         Write-Output "Installing nuget package $nugetPackage"
+        $arguments = "install $nugetPackage", "-ExcludeVersion", "-OutputDirectory `"$DataToolsPath`""
         if($PSBoundParameters.ContainsKey('$NugetPackageVersion')) {
-            $args = @(
-                "-ExcludeVersion"
-                "-OutputDirectory $DataToolsPath"
-                "-Version $NugetPackageVersion"
-            )            
-        } else {
-            $args = @(
-                "-ExcludeVersion"
-                "-OutputDirectory $DataToolsPath"
-            )
+            $arguments.Add("-Version $NugetPackageVersion")
         }
-        & nuget.exe install $nugetPackage $args
+        Write-Verbose "Running command: nuget.exe install $nugetPackage $arguments"
+        Start-Process nuget.exe -ArgumentList $arguments -Wait -NoNewWindow
     }
     catch
     {

@@ -1,5 +1,6 @@
 Function Get-NugetVersion
 {
+    Write-Verbose "Getting Nuget Version"
     $ErrorActionPreference = "SilentlyContinue"
     try {
         (& nuget.exe)[0].Split(':').Trim()[1]

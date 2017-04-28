@@ -1,4 +1,3 @@
-# no longer needed because it's installed with SSDT. Leaving here for now.
 Function Install-MsBuild
 {
     [cmdletbinding(DefaultParameterSetName="URL")]
@@ -62,22 +61,18 @@ Function Install-MsBuild
         }              
     }
 
-    # install MsBuild if it doesn't exist
-    if(! (Test-Path $MSBuildPath))
+
+    # install MsBuild if it doesn't exist or -Force
+    if(-not (Test-Path $MSBuildPath) -or $Force)
     {
         Write-Output "Installing MSBuildTools"    
-        Install-MSIPackage $MSBuildToolsInstaller
+        # Install-MSIPackage $MSBuildToolsInstaller # no
+        Start-Process -Wait $MSBuildToolsInstaller -ArgumentList "/quiet"
     }
         
     if(! (Test-Path $MSBuildPath))
     {
         throw "MSBuildTools failed to install"
-    }
-
-    if (Test-Path $MSBuildToolsInstaller)
-    {
-        Write-Verbose "Removing installer"
-        Remove-Item $MSBuildToolsInstaller
     }
 
     $version = Get-MsBuildVersion

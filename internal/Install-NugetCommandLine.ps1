@@ -21,7 +21,7 @@ Function Install-NugetCommandLine
     
     if([string]::IsNullOrEmpty($nugetVersion) -or $Force)
     {        
-        if ([string]::IsNullOrEmpty((choco))) {
+        if ([string]::IsNullOrEmpty($env:ChocolateyInstall)) {
             Write-Verbose "chocolatey package manager not installed, trying the hard way..."   
             $nugetExe = Join-Path $Path "nuget.exe"
             if (! (Test-Path $Path))

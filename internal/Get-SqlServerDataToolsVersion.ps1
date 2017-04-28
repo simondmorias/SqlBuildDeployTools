@@ -3,7 +3,7 @@ Function Get-SqlServerDataToolsVersion {
     param (
         $Path = $env:SBDT_SQLSERVERDATATOOLSPATH
     )
-
+    Write-Verbose "Getting SSDT Version"
     if ([string]::IsNullOrEmpty($Path)) {
         # default path to search for if env variable not populated - SSDT 14
         $Path = "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0\Common7\IDE"

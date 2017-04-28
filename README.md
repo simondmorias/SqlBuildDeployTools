@@ -15,7 +15,7 @@ Parameters:
 
 ### Example
 
-`Initialize-DatabaseProject -DatabaseProjectPath C:\Projects\MyDatabaseProject`
+`Import-Module C:\path\to\SqlBuildDeployTools -Force; Initialize-DatabaseProject -DatabaseProjectPath C:\Projects\MyDatabaseProject -Verbose`
 
 ## Initialize-SSISProject
 Builds a Sql Server Integration Services project to produce a .ispac file.
@@ -29,7 +29,7 @@ Parameters:
 
 ### Example
 
-`Initialize-SSISProject -SSISProjectPath C:\Projects\MySSISProject`
+`Import-Module C:\path\to\SqlBuildDeployTools -Force; Initialize-SSISProject -SSISProjectPath C:\Projects\MySSISProject -Verbose`
 
 ## Publish-DatabaseProject
 Deploys or generates a script to deploy a SQL Server database project to a SQL Server instance.
@@ -53,7 +53,7 @@ Parameters:
 
 ### Example
 
-`Publish-DatabaseProject -DatabaseProjectPath C:\Projects\MyDatabaseProject -PublishProfile C:\Projects\MyDatabaseProject\dev.publish.xml`
+`Import-Module C:\path\to\SqlBuildDeployTools -Force; Publish-DatabaseProject -DatabaseProjectPath C:\Projects\MyDatabaseProject -PublishProfile C:\Projects\MyDatabaseProject\publish.xml -Verbose`
 
 ## Publish-SSISProject
 Deploys a Sql Server Integration Services project to a SSIS Server
@@ -66,7 +66,7 @@ Deploys a Sql Server Integration Services project to a SSIS Server
 
 ### Example
 
-`Publish-SSISProject -SSISProjectPath C:\Projects\MySSISProject -SSISInstanceName MYINSTANCE -SSISFolderName TestFolder -Verbose`
+`Import-Module C:\path\to\SqlBuildDeployTools -Force; Publish-SSISProject -SSISProjectPath C:\Projects\MySSISProject -SSISInstanceName MYINSTANCE -SSISFolderName TestFolder -Verbose`
 
 # Requirements
  * Admin rights where it is run from.

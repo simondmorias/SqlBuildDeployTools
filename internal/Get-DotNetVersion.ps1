@@ -1,5 +1,6 @@
 Function Get-DotNetVersion
 {
+    Write-Verbose "Getting DotNet version"
     # Reference: https://msdn.microsoft.com/en-us/library/hh925568(v=vs.110).aspx
     $DotNetFrameWorkVersions = @{
         394806 = "4.6.2";

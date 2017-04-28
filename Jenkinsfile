@@ -1,11 +1,7 @@
 #!groovy
 node  {
 	stage ('checkout') {
-
-		// delete the workspace from the last build
 		deleteDir()
-
-		// checkout the project from git as configured in the project configuration
 		checkout scm
 	}
 	// initialize

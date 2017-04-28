@@ -31,6 +31,9 @@ If using SQL Authentication, this is the SQL Login. Overrides the publish profil
 .PARAMETER Password
 If using SQL Authentication, this is the password for the SQL Login. Overrides the publish profile.
 
+.PARAMETER MsDataToolsPath
+If you want to specify the path to the Microsoft.Data.Tools package, specify it here. Not required.
+
 .PARAMETER BuildConfiguration
 The Build Configuration  to deploy. Default is Debug.
 
@@ -90,6 +93,8 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
         [string]$Password,
         
         [parameter(Position=7)]
+		[string]$MsDataToolsPath,		
+		[string]$MSBuildPath,        
         [string]$BuildConfiguration='Debug',
         [switch]$DacpacRegister,        
         [string]$DacpacApplicationName = $DatabaseName,
@@ -102,7 +107,19 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
 	$SqlServerDataToolsVersion = (Get-SqlServerDataToolsVersion).ProductVersion
     $DotNetFrameworkVersion = Get-DotNetVersion
     Write-Verbose "`nNuget version: $NugetVersion`nMsBuild version: $MsBuildVersion`nSSDT version: $SqlServerDataToolsVersion`nMSDataTools Version: $MsDataToolsVersion`nDotNetVersion: $DotNetFrameworkVersion"
-    
+
+	if(-not ($PSBoundParameters.ContainsKey('MsDataToolsPath'))) {
+		$MsDataToolsPath = $env:SBDT_MSDATATOOLSPATH
+	}
+	if([string]::IsNullOrEmpty($MsDataToolsPath) -or (-not (Test-Path $MsDataToolsPath))) {
+		Write-Warning "Ms Data Tools not found, attempting installation."		
+		Install-MsDataTools
+		if([string]::IsNullOrEmpty($env:SBDT_MSDATATOOLSPATH)) {
+			throw "Microsoft Data Tools package not found. Attempt to install also failed."
+		}
+		$MsDataToolsPath = $env:SBDT_MSDATATOOLSPATH
+	}
+
     # try and load the DAC assembly
     try {
         $DacAssembly = 'Microsoft.SqlServer.Dac.dll'
@@ -126,7 +143,6 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
     Write-Verbose "Database Project Path: $DatabaseProjectPath"
     Write-Verbose "Database Project File: $DatabaseProjectFile"
 
-return
     # load the dacpac
     [xml]$ProjectFileContent = Get-Content $DatabaseProjectFile
     $DACPACLocation = "$DatabaseProjectPath\bin\$BuildConfiguration\" + $ProjectFileContent.Project.PropertyGroup.Name[0] + ".dacpac"
@@ -151,9 +167,10 @@ return
         }
     }
 
-    # if we have a pulblish profile and the path exists, load it. If not, specify some defaults
+    # if we have a publish profile and the path exists, load it. If not, specify some defaults
     if (-not([string]::IsNullOrEmpty($PublishProfile)) -and (Test-Path $PublishProfile)) {
         Write-Verbose "Loading publish profile from $PublishProfile"
+        $PublishProfile = (Get-ChildItem $PublishProfile).FullName # resolve relative path to absolute path
         $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)        
     } else {
         Write-Warning "$PublishProfile publish profile not found. Using default deployment options"
