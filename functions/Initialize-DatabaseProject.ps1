@@ -87,14 +87,17 @@ Creates a dacpac from the project found in directory C:\Projects\MyDatabaseProje
 	$DatabaseProjectFile = Get-ProjectFullPath $DatabaseProjectPath ".sqlproj"
 	$msbuild = Join-Path $MSBuildPath "msbuild.exe"
 
-    $args = @(
-        "/p:tv=$targetVersion"
-        "/p:SSDTPath=$MsDataToolsPath"
-        "/p:SQLDBExtensionsRefPath=$MsDataToolsPath"
-		"/p:Configuration=$BuildConfiguration"
+    $arguments = @(
+		"`"$DatabaseProjectFile`""
+		"`"/nologo`""
+        "`"/p:tv=$targetVersion`""
+        "`"/p:SSDTPath=$MsDataToolsPath`""
+        "`"/p:SQLDBExtensionsRefPath=$MsDataToolsPath`""
+		"`"/p:Configuration=$BuildConfiguration`""
     )  
-	Write-Verbose "Arguments passed to MSBuild:`n$args"
+	Write-Verbose "Arguments passed to MSBuild:`n$arguments"
 
-	Write-Verbose "$msbuild $DatabaseSolutionFilePath $args"
-	& $msbuild $DatabaseProjectFile $args
+	Write-Verbose "$msbuild $arguments"
+	# Start-Process $msbuild -ArgumentList $arguments -Wait -NoNewWindow
+	& $msbuild $arguments
 }

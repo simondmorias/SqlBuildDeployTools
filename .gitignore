@@ -7,3 +7,24 @@
 .vscode/*
 Plan.txt
 *.vsdx
+*.dbmdl
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.jfm
+*.txt
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+[Xx]64/
+[Xx]86/
+[Bb]uild/
+bld/
+[Bb]in/
+[Oo]bj/
