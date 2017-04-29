@@ -31,6 +31,9 @@ If using SQL Authentication, this is the SQL Login. Overrides the publish profil
 .PARAMETER Password
 If using SQL Authentication, this is the password for the SQL Login. Overrides the publish profile.
 
+.PARAMETER SqlCmdVariables
+A hashtable of SqlCmd variables to pass at deployment time. Declare your hashtable in PS and then pass it in.
+
 .PARAMETER MsDataToolsPath
 If you want to specify the path to the Microsoft.Data.Tools package, specify it here. Not required.
 
@@ -93,8 +96,7 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
         [string]$Password,
         
         [hashtable]$SqlCmdVariables,
-		[string]$MsDataToolsPath,		
-		[string]$MSBuildPath,        
+		[string]$MsDataToolsPath,		        
         [string]$BuildConfiguration='Debug',
         [switch]$DacpacRegister,        
         [string]$DacpacApplicationName = $DatabaseName,
