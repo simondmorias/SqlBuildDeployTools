@@ -92,7 +92,7 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
             ParameterSetName="ConnectionString")]
         [string]$Password,
         
-        [parameter(Position=7)]
+        [hashtable]$SqlCmdVariables,
 		[string]$MsDataToolsPath,		
 		[string]$MSBuildPath,        
         [string]$BuildConfiguration='Debug',
@@ -212,9 +212,19 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
         Write-Verbose "Discovered InstanceName: $InstanceName, DatabaseName: $DatabaseName"
     }
 
+    
     Write-Verbose "`nDatabaseProjectPath: $DatabaseProjectPath`nDatabaseProjectFile: $DatabaseProjectFile`nDACPACLocation: $DACPACLocation"
     Write-Verbose "`nInstanceName: $InstanceName`nDatabaseName: $DatabaseName"
     $dacServices = New-Object Microsoft.SqlServer.Dac.DacServices (Get-ConnectionString -InstanceName $InstanceName -DatabaseName $DatabaseName -SqlLogin $SqlLogin -Password $Password)
+
+    # Inject sqlcmd variables
+    if ($PSBoundParameters.ContainsKey('SqlCmdVariables'))
+    {
+        Write-Verbose "Setting the following SqlCmd Variables: $($sqlcmdVariables.GetEnumerator().Name)"
+        foreach ($cmdVar in $SqlCmdVariables.GetEnumerator()) {
+            $dacProfile.DeployOptions.SqlCommandVariableValues[$cmdVar.Key] = $cmdVar.Value
+        }
+    }    
 
     # we got this far so let's deploy, script or report
     try {
