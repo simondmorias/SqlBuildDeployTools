@@ -218,7 +218,6 @@ Deploys the project in C:\Projects\MyDatabaseProject to the server details in pu
 
     # we got this far so let's deploy, script or report
     try {
-        # Register-ObjectEvent -InputObject $dacServices -EventName Message -Action { Write-Host -in $EventArgs.Message.Message }
         $r = Register-ObjectEvent -in $dacServices -EventName Message -Source "msg" -Action { Out-Host -in $Event.SourceArgs[1].Message.Message} | Out-Null
         switch ($DeployOption) {
             'DACPAC_DEPLOY' {
