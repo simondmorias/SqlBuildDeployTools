@@ -18,10 +18,16 @@ Function Install-NugetCommandLine
     }    
     
     $nugetVersion = Get-NugetVersion    
-    
+    try {
+        Start-Process choco -ErrorAction Stop
+    }
+    catch [System.InvalidOperationException]
+    {
+        $chocoInstalled = $false
+    }    
     if([string]::IsNullOrEmpty($nugetVersion) -or $Force)
     {        
-        if ([string]::IsNullOrEmpty($env:ChocolateyInstall)) {
+        if ([string]::IsNullOrEmpty($env:ChocolateyInstall) -or (-not $chocoInstalled)) {
             Write-Verbose "chocolatey package manager not installed, trying the hard way..."   
             $nugetExe = Join-Path $Path "nuget.exe"
             if (! (Test-Path $Path))

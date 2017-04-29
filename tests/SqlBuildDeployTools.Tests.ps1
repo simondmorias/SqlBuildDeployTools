@@ -35,9 +35,14 @@ Describe "$module tests" -Tags 'General' {
         'Get-MsBuildVersion',
         'Get-MsDataToolsVersion',
         'Get-NugetVersion',
+        'Get-ProjectFullPath',
+        'Get-SQLFeaturePackItemVersion',
+        'Get-SqlServerDataToolsVersion',
         'Install-MsBuild',
         'Install-MsDataTools',        
+        'Install-MSIPackage',
         'Install-NugetCommandLine',
+        'Install-SQLFeaturePackItem',
         'Test-FileHash',
         'Test-PsUserIsAdmin'
     )
