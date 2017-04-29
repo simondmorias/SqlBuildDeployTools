@@ -46,7 +46,7 @@ Parameters:
  * **[-SqlLogin]**:If using SQL Authentication, this is the SQL Login. Overrides the publish profile.
  * **[-Password]**:If using SQL Authentication, this is the password for the SQL Login. Overrides the publish profile.
  * **[-SqlCmdVariables]**: A hashtable of SqlCmd variables to pass at deployment time. Declare your hashtable in PS and then pass it in.
-* **[-MsDataToolsPath]**: If you want to specify the path to the Microsoft.Data.Tools package, specify it here. Not required.
+ * **[-MsDataToolsPath]**: If you want to specify the path to the Microsoft.Data.Tools package, specify it here. Not required.
  * **[-BuildConfiguration]**: The Build Configuration  to deploy. Default is Debug.
  * **[-DacpacRegister]**: Switch to specify whether to register the dacpac on the server or not. Defaults to off
  * **[-DacpacApplicationName]**: The name of the dacpac when registering with the server. Defaults to the database name
