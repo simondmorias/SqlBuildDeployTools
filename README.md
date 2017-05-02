@@ -6,7 +6,7 @@ This module makes building and deploying SQL Server database and SSIS projects e
 Builds a Sql Server Data Tools project to produce a .dacpac file.
 
 Parameters:
- * **[-DatabaseProjectPath]**: The path to the project file. This can be the folder or the .sqlproj file path.
+ * **-DatabaseProjectPath**: The path to the project file. This can be the folder or the .sqlproj file path.
  * **[-TargetVersion]**: Target version to build. Default is 14.
  * **[-SqlServerDataToolsPath]**: If Sql Server Data Tools has been installed in a different location to the default, specify it here.
  * **[-MSBuildPath]**: The path to MSBuild. If this is different to the default specify it here.
@@ -21,7 +21,7 @@ Parameters:
 Builds a Sql Server Integration Services project to produce a .ispac file.
 
 Parameters:
- * **[-SSISProjectPath]**: The path to the SSIS project file. This can be the folder or the .dtproj file path.
+ * **-SSISProjectPath**: The path to the SSIS project file. This can be the folder or the .dtproj file path.
  * **[-SolutionPath]**: The path to the solution that this SSIS project belongs to.
  * **[-SqlServerDataToolsPath]**: If Sql Server Data Tools has been installed in a different location to the default, specify it here.
  * **[-BuildConfiguration]**: The configuration setting to build. Default is Development.
@@ -35,8 +35,8 @@ Parameters:
 Deploys or generates a script to deploy a SQL Server database project to a SQL Server instance.
 
 Parameters:
- * **[-DatabaseProjectPath]**: The path to the project file. This can be the folder or the .sqlproj file path.
- * **[-PublishProfile]**: The path to the publish profile. If not specified, the function will look for one in the root.
+ * **-DatabaseProjectPath**: The path to the project file. This can be the folder or the .sqlproj file path.
+ * **-PublishProfile**: The path to the publish profile. If not specified, the function will look for one in the root.
  * **[-DeployOption]**: Can be one of the following with a default of 'DACPAC_DEPLOY'
     * 'DACPAC_DEPLOY': Deploys the dacpac to a SQL Server database.
     * 'DACPAC_SCRIPT': Generates a deployment script in the dacpac location, but  does not deploy to the target.
@@ -60,9 +60,9 @@ Parameters:
 ## Publish-SSISProject
 Deploys a Sql Server Integration Services project to a SSIS Server
 
- * **[-SSISProjectPath]**: The path to the SSIS project file. This can be the folder or the .dtproj file path.
- * **[-SSISInstanceName]**: The name of the SQL Server instance to deploy the project to
- * **[-SSISFolderName]**: The SSIS Folder to deploy to on the SSIS Instance
+ * **-SSISProjectPath**: The path to the SSIS project file. This can be the folder or the .dtproj file path.
+ * **-SSISInstanceName**: The name of the SQL Server instance to deploy the project to
+ * **-SSISFolderName**: The SSIS Folder to deploy to on the SSIS Instance
  * **[-BuildConfiguration]**: The configuration setting to build. Default is Development.
  * **[-SSISCatalogName]**: The name of the SSIS Catalog. Default is SSISDB
 
